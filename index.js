@@ -1,6 +1,8 @@
 'use strict';
+var path = require('path');
 var childProcess = require('child_process');
 var tasklist = require('tasklist');
+var parseColumns = require('parse-columns');
 
 function win(cb) {
 	tasklist(function (err, data) {
@@ -12,7 +14,8 @@ function win(cb) {
 		var ret = data.map(function (el) {
 			return {
 				pid: el.pid,
-				name: el.imageName
+				name: el.imageName,
+				cmd: el.imageName
 			};
 		});
 
@@ -20,26 +23,30 @@ function win(cb) {
 	});
 }
 
-function def(opts, cb) {
-	if (typeof opts !== 'object') {
-		cb = opts;
-		opts = {};
-	}
-
-	var columns = 'pid,' + (opts.args ? 'args' : 'comm');
-
-	childProcess.execFile('ps', ['axo', columns], function (err, stdout) {
+function def(cb) {
+	childProcess.execFile('ps', ['axo', 'pid,comm,args'], function (err, stdout) {
 		if (err) {
 			cb(err);
 			return;
 		}
 
-		var ret = stdout.trim().split('\n').slice(1).map(function (el) {
-			var parts = el.trim().split(/\d /);
-			return {
-				pid: Number(parts[0]),
-				name: parts[1]
-			};
+		var ret = parseColumns(stdout, {
+			headers: [
+				'pid',
+				'name',
+				'cmd'
+			],
+			transform: function (el, header) {
+				if (header === 'pid') {
+					return Number(el);
+				}
+
+				if (header === 'name') {
+					return path.basename(el);
+				}
+
+				return el;
+			}
 		});
 
 		cb(null, ret);

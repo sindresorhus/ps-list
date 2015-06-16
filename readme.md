@@ -19,28 +19,9 @@ var psList = require('ps-list');
 
 psList(function (err, data) {
 	console.log(data);
-	//=> [{pid: 3213, name: 'node'}, ...]
-});
-
-psList({args: true}, function (err, data) {
-	console.log(data);
-	//=> [{pid: 3213, name: 'node test.js'}, ...]
+	//=> [{pid: 3213, name: 'node', cmd: 'node test.js'}, ...]
 });
 ```
-
-
-## API
-
-### psList([options], callback)
-
-#### options
-
-##### args
-
-Type: `boolean`  
-Default: `false`
-
-Include process startup arguments. Moot on Windows.
 
 
 ## License
