@@ -23,11 +23,17 @@ function win(cb) {
 	});
 }
 
-function def(cb) {
+function def(opts, cb) {
+	if (typeof opts !== 'object') {
+		cb = opts;
+		opts = {};
+	}
+
 	var ret = {};
+	var flags = (opts.all !== false ? 'a' : '') + 'wwxo';
 
 	eachAsync(['comm', 'args'], function (cmd, i, next) {
-		childProcess.execFile('ps', ['wwaxo', 'pid,' + cmd], function (err, stdout) {
+		childProcess.execFile('ps', [flags, 'pid,' + cmd], function (err, stdout) {
 			if (err) {
 				next(err);
 				return;

@@ -24,6 +24,20 @@ psList(function (err, data) {
 ```
 
 
+## API
+
+### psList([options], callback)
+
+#### options
+
+##### all
+
+Type: `boolean`  
+Default: `true`
+
+Return other users' processes as well as your own.
+
+
 ## License
 
 MIT © [Sindre Sorhus](http://sindresorhus.com)
