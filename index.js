@@ -2,7 +2,7 @@
 var path = require('path');
 var childProcess = require('child_process');
 var tasklist = require('tasklist');
-var parseColumns = require('parse-columns');
+var eachAsync = require('each-async');
 
 function win(cb) {
 	tasklist(function (err, data) {
@@ -24,32 +24,49 @@ function win(cb) {
 }
 
 function def(cb) {
-	childProcess.execFile('ps', ['axo', 'pid,comm,args'], function (err, stdout) {
+	var ret = {};
+
+	eachAsync(['comm', 'args'], function (cmd, i, next) {
+		childProcess.execFile('ps', ['wwaxo', 'pid,' + cmd], function (err, stdout) {
+			if (err) {
+				next(err);
+				return;
+			}
+
+			stdout.trim().split('\n').slice(1).forEach(function (x) {
+				x = x.trim();
+
+				var pid = x.split(' ', 1)[0];
+				var val = x.slice(pid.length + 1).trim();
+
+				if (ret[pid] === undefined) {
+					ret[pid] = {};
+				}
+
+				ret[pid][cmd] = val;
+			});
+
+			next();
+		});
+	}, function (err) {
 		if (err) {
 			cb(err);
 			return;
 		}
 
-		var ret = parseColumns(stdout, {
-			headers: [
-				'pid',
-				'name',
-				'cmd'
-			],
-			transform: function (el, header) {
-				if (header === 'pid') {
-					return Number(el);
-				}
-
-				if (header === 'name') {
-					return path.basename(el);
-				}
-
-				return el;
-			}
+		var list = Object.keys(ret).filter(function (x) {
+			// filter out inconsistencies as there might be race
+			// issues due to differences in `ps` between the spawns
+			return ret[x].comm && ret[x].args;
+		}).map(function (x) {
+			return {
+				pid: parseInt(x, 10),
+				name: path.basename(ret[x].comm),
+				cmd: ret[x].args
+			};
 		});
 
-		cb(null, ret);
+		cb(null, list);
 	});
 }
 

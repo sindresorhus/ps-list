@@ -27,7 +27,7 @@
     "tasklist"
   ],
   "dependencies": {
-    "parse-columns": "^1.0.0",
+    "each-async": "^1.1.1",
     "tasklist": "^1.0.0"
   },
   "devDependencies": {
