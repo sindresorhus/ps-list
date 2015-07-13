@@ -4,7 +4,12 @@ var childProcess = require('child_process');
 var tasklist = require('tasklist');
 var eachAsync = require('each-async');
 
-function win(cb) {
+function win(opts, cb) {
+	if (typeof opts !== 'object') {
+		cb = opts;
+		opts = {};
+	}
+
 	tasklist(function (err, data) {
 		if (err) {
 			cb(err);
