@@ -3,6 +3,7 @@ var path = require('path');
 var childProcess = require('child_process');
 var tasklist = require('tasklist');
 var eachAsync = require('each-async');
+var TEN_MEBIBYTE = 1024 * 1024 * 10;
 
 function win(opts, cb) {
 	if (typeof opts !== 'object') {
@@ -38,7 +39,9 @@ function def(opts, cb) {
 	var flags = (opts.all !== false ? 'a' : '') + 'wwxo';
 
 	eachAsync(['comm', 'args'], function (cmd, i, next) {
-		childProcess.execFile('ps', [flags, 'pid,' + cmd], function (err, stdout) {
+		childProcess.execFile('ps', [flags, 'pid,' + cmd], {
+			maxBuffer: TEN_MEBIBYTE
+		}, function (err, stdout) {
 			if (err) {
 				next(err);
 				return;
