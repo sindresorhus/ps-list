@@ -27,8 +27,9 @@
     "tasklist"
   ],
   "dependencies": {
-    "each-async": "^1.1.1",
-    "tasklist": "^1.0.0"
+    "pify": "^2.2.0",
+    "pinkie-promise": "^1.0.0",
+    "tasklist": "^2.0.0"
   },
   "devDependencies": {
     "ava": "0.0.4"

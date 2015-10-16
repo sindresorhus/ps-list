@@ -15,9 +15,9 @@ $ npm install --save ps-list
 ## Usage
 
 ```js
-var psList = require('ps-list');
+const psList = require('ps-list');
 
-psList(function (err, data) {
+psList().then(data => {
 	console.log(data);
 	//=> [{pid: 3213, name: 'node', cmd: 'node test.js'}, ...]
 });
@@ -26,7 +26,9 @@ psList(function (err, data) {
 
 ## API
 
-### psList([options], callback)
+### psList([options])
+
+Returns a promise for an array with the running processes.
 
 #### options
 

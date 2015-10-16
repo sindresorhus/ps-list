@@ -7,9 +7,7 @@ test(function (t) {
 
 	var binName = process.platform === 'win32' ? 'node.exe' : 'node';
 
-	psList(function (err, list) {
-		t.assert(!err, err);
-
+	psList().then(function (list) {
 		t.assert(list.some(function (x) {
 			return x.name.indexOf(binName) !== -1;
 		}));
