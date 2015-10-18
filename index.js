@@ -10,11 +10,11 @@ function win(opts) {
 	opts = opts || {};
 
 	return tasklist().then(function (data) {
-		return data.map(function (el) {
+		return data.map(function (x) {
 			return {
-				pid: el.pid,
-				name: el.imageName,
-				cmd: el.imageName
+				pid: x.pid,
+				name: x.imageName,
+				cmd: x.imageName
 			};
 		});
 	});
