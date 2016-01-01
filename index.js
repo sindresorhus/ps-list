@@ -24,7 +24,7 @@ function def(opts) {
 	opts = opts || {};
 
 	var ret = {};
-	var flags = (opts.all !== false ? 'a' : '') + 'wwxo';
+	var flags = (opts.all === false ? '' : 'a') + 'wwxo';
 
 	return Promise.all(['comm', 'args'].map(function (cmd) {
 		return pify(childProcess.execFile, Promise)('ps', [flags, 'pid,' + cmd], {
