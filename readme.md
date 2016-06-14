@@ -2,7 +2,7 @@
 
 > Get running processes
 
-Works on OS X, Linux, Windows.
+Works on macOS, Linux, Windows.
 
 
 ## Install
