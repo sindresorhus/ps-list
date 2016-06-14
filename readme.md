@@ -34,7 +34,7 @@ Returns a promise for an array with the running processes.
 
 ##### all
 
-Type: `boolean`  
+Type: `boolean`<br>
 Default: `true`
 
 Return other users' processes as well as your own.
@@ -44,4 +44,4 @@ On Windows this has no effect and will always be the users' own processes.
 
 ## License
 
-MIT © [Sindre Sorhus](http://sindresorhus.com)
+MIT © [Sindre Sorhus](https://sindresorhus.com)
