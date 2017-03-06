@@ -4,11 +4,10 @@ var childProcess = require('child_process');
 var tasklist = require('tasklist');
 var pify = require('pify');
 var Promise = require('pinkie-promise');
+
 var TEN_MEBIBYTE = 1024 * 1024 * 10;
 
-function win(opts) {
-	opts = opts || {};
-
+function win() {
 	return tasklist().then(function (data) {
 		return data.map(function (x) {
 			return {
