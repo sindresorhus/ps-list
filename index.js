@@ -25,7 +25,7 @@ function def(opts) {
 	var ret = {};
 	var flags = (opts.all === false ? '' : 'a') + 'wwxo';
 
-	return Promise.all(['comm', 'args'].map(function (cmd) {
+	return Promise.all(['comm', 'args', '%cpu'].map(function (cmd) {
 		return pify(childProcess.execFile, Promise)('ps', [flags, 'pid,' + cmd], {
 			maxBuffer: TEN_MEBIBYTE
 		}).then(function (stdout) {
@@ -51,7 +51,8 @@ function def(opts) {
 			return {
 				pid: parseInt(x, 10),
 				name: path.basename(ret[x].comm),
-				cmd: ret[x].args
+				cmd: ret[x].args,
+				cpu: ret[x]['%cpu']
 			};
 		});
 	});

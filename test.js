@@ -9,5 +9,6 @@ test(async t => {
 	t.true(list.every(x =>
 		typeof x.pid === 'number' &&
 		typeof x.name === 'string' &&
-		typeof x.cmd === 'string'));
+		typeof x.cmd === 'string' &&
+		typeof x.cpu === 'string'));
 });
