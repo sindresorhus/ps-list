@@ -23,6 +23,8 @@ psList().then(data => {
 });
 ```
 
+> The `cpu` percentage is not supported on Windows.
+
 
 ## API
 
