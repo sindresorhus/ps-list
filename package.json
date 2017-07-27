@@ -1,38 +1,38 @@
 {
-	"name": "ps-list",
-	"version": "3.1.0",
-	"description": "Get running processes",
-	"license": "MIT",
-	"repository": "sindresorhus/ps-list",
-	"author": {
-		"name": "Sindre Sorhus",
-		"email": "sindresorhus@gmail.com",
-		"url": "sindresorhus.com"
-	},
-	"engines": {
-		"node": ">=4"
-	},
-	"scripts": {
-		"test": "xo && ava"
-	},
-	"files": [
-		"index.js"
-	],
-	"keywords": [
-		"ps",
-		"proc",
-		"process",
-		"processes",
-		"list",
-		"running",
-		"tasklist"
-	],
-	"dependencies": {
-		"pify": "^3.0.0",
-		"tasklist": "^3.1.0"
-	},
-	"devDependencies": {
-		"ava": "*",
-		"xo": "*"
-	}
+  "name": "ps-list",
+  "version": "4.0.0",
+  "description": "Get running processes",
+  "license": "MIT",
+  "repository": "sindresorhus/ps-list",
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=4"
+  },
+  "scripts": {
+    "test": "xo && ava"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "ps",
+    "proc",
+    "process",
+    "processes",
+    "list",
+    "running",
+    "tasklist"
+  ],
+  "dependencies": {
+    "pify": "^3.0.0",
+    "tasklist": "^3.1.0"
+  },
+  "devDependencies": {
+    "ava": "*",
+    "xo": "*"
+  }
 }
