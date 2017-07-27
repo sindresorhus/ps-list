@@ -2,13 +2,13 @@
 
 > Get running processes
 
-Works on macOS, Linux, Windows.
+Works on macOS, Linux, and Windows.
 
 
 ## Install
 
 ```
-$ npm install --save ps-list
+$ npm install ps-list
 ```
 
 
@@ -30,9 +30,11 @@ psList().then(data => {
 
 ### psList([options])
 
-Returns a promise for an array with the running processes.
+Returns a `Promise<Array>` with the running processes.
 
 #### options
+
+Type: `Object`
 
 ##### all
 
