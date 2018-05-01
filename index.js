@@ -18,11 +18,9 @@ function win() {
 	});
 }
 
-function def(opts) {
-	opts = opts || {};
-
+function def(options = {}) {
 	const ret = {};
-	const flags = (opts.all === false ? '' : 'a') + 'wwxo';
+	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 
 	return Promise.all(['comm', 'args', '%cpu', '%mem'].map(cmd => {
 		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`], {
@@ -30,7 +28,7 @@ function def(opts) {
 		}).then(stdout => {
 			for (let line of stdout.trim().split('\n').slice(1)) {
 				line = line.trim();
-				const pid = line.split(' ', 1)[0];
+				const [pid] = line.split(' ', 1);
 				const val = line.slice(pid.length + 1).trim();
 
 				if (ret[pid] === undefined) {
@@ -43,6 +41,7 @@ function def(opts) {
 	})).then(() => {
 		// Filter out inconsistencies as there might be race
 		// issues due to differences in `ps` between the spawns
+		// TODO: Use `Object.entries` when targeting Node.js 8
 		return Object.keys(ret).filter(x => ret[x].comm && ret[x].args).map(x => {
 			return {
 				pid: parseInt(x, 10),
