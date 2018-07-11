@@ -23,7 +23,7 @@ psList().then(data => {
 });
 ```
 
-> The `cpu` and `memory` percentage is not supported on Windows.
+> The `cpu` and `memory` percentage and the `ppid` are not supported on Windows.
 
 
 ## API
