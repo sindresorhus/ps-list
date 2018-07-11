@@ -24,7 +24,7 @@ test('main', async t => {
 			)
 		);
 		t.true(
-			list.every(x => 
+			list.every(x =>
 				typeof x.ppid === 'number'
 			)
 		);
