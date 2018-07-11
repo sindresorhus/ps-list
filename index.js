@@ -47,7 +47,7 @@ function def(options = {}) {
 				pid: parseInt(x, 10),
 				name: path.basename(ret[x].comm),
 				cmd: ret[x].args,
-				ppid: parseInt(ret[x].ppid, x),
+				ppid: parseInt(ret[x].ppid, 10),
 				cpu: ret[x]['%cpu'],
 				memory: ret[x]['%mem']
 			};

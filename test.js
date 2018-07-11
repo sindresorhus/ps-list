@@ -12,8 +12,7 @@ test('main', async t => {
 		list.every(x =>
 			typeof x.pid === 'number' &&
 			typeof x.name === 'string' &&
-			typeof x.cmd === 'string' &&
-			typeof x.ppid === 'number'
+			typeof x.cmd === 'string'
 		)
 	);
 
@@ -21,7 +20,8 @@ test('main', async t => {
 		t.true(
 			list.every(x =>
 				typeof x.cpu === 'string' &&
-				typeof x.memory === 'string'
+				typeof x.memory === 'string' &&
+				typeof x.ppid === 'number'
 			)
 		);
 	}
