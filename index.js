@@ -42,7 +42,7 @@ function def(options = {}) {
 		// Filter out inconsistencies as there might be race
 		// issues due to differences in `ps` between the spawns
 		// TODO: Use `Object.entries` when targeting Node.js 8
-		return Object.keys(ret).filter(x => ret[x].comm && ret[x].args && ret[x].ppid).map(x => {
+		return Object.keys(ret).filter(x => ret[x].comm && ret[x].args && ret[x].ppid && ret[x]['%cpu'] && ret[x]['%mem']).map(x => {
 			return {
 				pid: parseInt(x, 10),
 				name: path.basename(ret[x].comm),
