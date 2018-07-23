@@ -23,5 +23,8 @@ test('main', async t => {
 				typeof x.memory === 'string'
 			)
 		);
+		t.true(
+			list.every(x => typeof x.ppid === 'number')
+		);
 	}
 });
