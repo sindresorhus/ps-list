@@ -4,8 +4,6 @@ const childProcess = require('child_process');
 const tasklist = require('tasklist');
 const pify = require('pify');
 
-const TEN_MEGABYTE = 1000 * 1000 * 10;
-
 function win() {
 	return tasklist().then(data => {
 		return data.map(x => {
@@ -23,9 +21,7 @@ function def(options = {}) {
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 
 	return Promise.all(['comm', 'args', 'ppid', '%cpu', '%mem'].map(cmd => {
-		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`], {
-			maxBuffer: TEN_MEGABYTE
-		}).then(stdout => {
+		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`]).then(stdout => {
 			for (let line of stdout.trim().split('\n').slice(1)) {
 				line = line.trim();
 				const [pid] = line.split(' ', 1);
@@ -44,12 +40,12 @@ function def(options = {}) {
 		// TODO: Use `Object.entries` when targeting Node.js 8
 		return Object.keys(ret).filter(x => ret[x].comm && ret[x].args && ret[x].ppid && ret[x]['%cpu'] && ret[x]['%mem']).map(x => {
 			return {
-				pid: parseInt(x, 10),
+				pid: Number.parseInt(x, 10),
 				name: path.basename(ret[x].comm),
 				cmd: ret[x].args,
-				ppid: parseInt(ret[x].ppid, 10),
-				cpu: ret[x]['%cpu'],
-				memory: ret[x]['%mem']
+				ppid: Number.parseInt(ret[x].ppid, 10),
+				cpu: Number.parseFloat(ret[x]['%cpu']),
+				memory: Number.parseFloat(ret[x]['%mem'])
 			};
 		});
 	});

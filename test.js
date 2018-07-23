@@ -19,8 +19,8 @@ test('main', async t => {
 	if (!isWindows) {
 		t.true(
 			list.every(x =>
-				typeof x.cpu === 'string' &&
-				typeof x.memory === 'string'
+				typeof x.cpu === 'number' &&
+				typeof x.memory === 'number'
 			)
 		);
 		t.true(
