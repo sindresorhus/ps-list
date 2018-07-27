@@ -3,6 +3,7 @@ const path = require('path');
 const childProcess = require('child_process');
 const tasklist = require('tasklist');
 const pify = require('pify');
+const mypid = require('process').pid;
 
 function win() {
 	return tasklist().then(data => {
@@ -38,7 +39,7 @@ function def(options = {}) {
 		// Filter out inconsistencies as there might be race
 		// issues due to differences in `ps` between the spawns
 		// TODO: Use `Object.entries` when targeting Node.js 8
-		return Object.keys(ret).filter(x => ret[x].comm && ret[x].args && ret[x].ppid && ret[x]['%cpu'] && ret[x]['%mem']).map(x => {
+		return Object.keys(ret).filter(x => ret[x].comm && ret[x].args && ret[x].ppid && ret[x]['%cpu'] && ret[x]['%mem']).filter(x => parseInt(x, 10) !== mypid).map(x => {
 			return {
 				pid: Number.parseInt(x, 10),
 				name: path.basename(ret[x].comm),
