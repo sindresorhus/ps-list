@@ -1,9 +1,9 @@
 'use strict';
 const path = require('path');
 const childProcess = require('child_process');
+const mypid = require('process').pid;
 const tasklist = require('tasklist');
 const pify = require('pify');
-const mypid = require('process').pid;
 
 function win() {
 	return tasklist().then(data => {
@@ -20,7 +20,7 @@ function win() {
 function def(options = {}) {
 	const ret = {};
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
-	const includeSelf = options.includeSelf;
+	const { includeSelf } = options;
 
 	return Promise.all(['comm', 'args', 'ppid', '%cpu', '%mem'].map(cmd => {
 		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`]).then(stdout => {
