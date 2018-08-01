@@ -20,7 +20,7 @@ function win() {
 function def(options = {}) {
 	const ret = {};
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
-	const includeSelf = (options.includeSelf === false ? false: true)
+	const includeSelf = (options.includeSelf === false ? false: true);
 
 	return Promise.all(['comm', 'args', 'ppid', '%cpu', '%mem'].map(cmd => {
 		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`]).then(stdout => {
