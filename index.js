@@ -20,7 +20,7 @@ function win() {
 function def(options = {}) {
 	const ret = {};
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
-	const { includeSelf } = options;
+	const {includeSelf} = options;
 
 	return Promise.all(['comm', 'args', 'ppid', '%cpu', '%mem'].map(cmd => {
 		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`]).then(stdout => {
@@ -51,18 +51,17 @@ function def(options = {}) {
 					memory: Number.parseFloat(ret[x]['%mem'])
 				};
 			});
-		} else {
-			return Object.keys(ret).filter(x => ret[x].comm && ret[x].args && ret[x].ppid && ret[x]['%cpu'] && ret[x]['%mem']).filter(x => parseInt(x, 10) !== mypid).map(x => {
-				return {
-					pid: Number.parseInt(x, 10),
-					name: path.basename(ret[x].comm),
-					cmd: ret[x].args,
-					ppid: Number.parseInt(ret[x].ppid, 10),
-					cpu: Number.parseFloat(ret[x]['%cpu']),
-					memory: Number.parseFloat(ret[x]['%mem'])
-				};
-			});
 		}
+		return Object.keys(ret).filter(x => ret[x].comm && ret[x].args && ret[x].ppid && ret[x]['%cpu'] && ret[x]['%mem']).filter(x => parseInt(x, 10) !== mypid).map(x => {
+			return {
+				pid: Number.parseInt(x, 10),
+				name: path.basename(ret[x].comm),
+				cmd: ret[x].args,
+				ppid: Number.parseInt(ret[x].ppid, 10),
+				cpu: Number.parseFloat(ret[x]['%cpu']),
+				memory: Number.parseFloat(ret[x]['%mem'])
+			};
+		});
 	});
 }
 
