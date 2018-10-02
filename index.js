@@ -4,6 +4,8 @@ const childProcess = require('child_process');
 const tasklist = require('tasklist');
 const pify = require('pify');
 
+const TEN_MEGABYTES = 1000 * 1000 * 10;
+
 function win() {
 	return tasklist().then(data => {
 		return data.map(x => {
@@ -21,7 +23,7 @@ function def(options = {}) {
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 
 	return Promise.all(['comm', 'args', 'ppid', '%cpu', '%mem'].map(cmd => {
-		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`]).then(stdout => {
+		return pify(childProcess.execFile)('ps', [flags, `pid,${cmd}`], {maxBuffer: TEN_MEGABYTES}).then(stdout => {
 			for (let line of stdout.trim().split('\n').slice(1)) {
 				line = line.trim();
 				const [pid] = line.split(' ', 1);
