@@ -12,19 +12,17 @@ test('main', async t => {
 		list.every(x =>
 			typeof x.pid === 'number' &&
 			typeof x.name === 'string' &&
-			typeof x.cmd === 'string'
+			typeof x.ppid === 'number'
 		)
 	);
 
 	if (!isWindows) {
 		t.true(
 			list.every(x =>
+				typeof x.cmd === 'string' &&
 				typeof x.cpu === 'number' &&
 				typeof x.memory === 'number'
 			)
-		);
-		t.true(
-			list.every(x => typeof x.ppid === 'number')
 		);
 	}
 });

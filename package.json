@@ -28,8 +28,7 @@
 		"tasklist"
 	],
 	"dependencies": {
-		"pify": "^3.0.0",
-		"tasklist": "^3.1.0"
+		"pify": "^4.0.0"
 	},
 	"devDependencies": {
 		"ava": "*",

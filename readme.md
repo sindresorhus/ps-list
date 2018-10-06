@@ -23,7 +23,7 @@ const psList = require('ps-list');
 })();
 ```
 
-> The `cpu`, `memory`, and `ppid` properties are not supported on Windows.
+> The `cmd`, `cpu`, and `memory` properties are not supported on Windows.
 
 
 ## API
