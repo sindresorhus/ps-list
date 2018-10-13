@@ -6,7 +6,9 @@ const pify = require('pify');
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 
 function win() {
+	// Source: https://github.com/MarkTiedemann/fastlist
 	const bin = path.join(__dirname, 'fastlist.exe');
+
 	return pify(childProcess.execFile)(bin, {maxBuffer: TEN_MEGABYTES})
 		.then(stdout =>
 			stdout.trim()
