@@ -1,21 +1,25 @@
 'use strict';
 const path = require('path');
 const childProcess = require('child_process');
-const tasklist = require('tasklist');
 const pify = require('pify');
 
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 
 function win() {
-	return tasklist().then(data => {
-		return data.map(x => {
-			return {
-				pid: x.pid,
-				name: x.imageName,
-				cmd: x.imageName
-			};
-		});
-	});
+	// Source: https://github.com/MarkTiedemann/fastlist
+	const bin = path.join(__dirname, 'fastlist.exe');
+
+	return pify(childProcess.execFile)(bin, {maxBuffer: TEN_MEGABYTES})
+		.then(stdout =>
+			stdout.trim()
+				.split('\r\n')
+				.map(line => line.split('\t'))
+				.map(([name, pid, ppid]) => ({
+					name,
+					pid: Number.parseInt(pid, 10),
+					ppid: Number.parseInt(ppid, 10)
+				}))
+		);
 }
 
 function def(options = {}) {
