@@ -1,11 +1,11 @@
 import test from 'ava';
-import m from '.';
+import psList from '.';
 
 const isWindows = process.platform === 'win32';
 
 test('main', async t => {
 	const binName = isWindows ? 'node.exe' : 'ava';
-	const list = await m();
+	const list = await psList();
 
 	t.true(list.some(x => x.name.includes(binName)));
 	t.true(

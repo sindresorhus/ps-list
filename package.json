@@ -10,13 +10,14 @@
 		"url": "sindresorhus.com"
 	},
 	"engines": {
-		"node": ">=6"
+		"node": ">=8"
 	},
 	"scripts": {
 		"test": "xo && ava"
 	},
 	"files": [
-		"index.js"
+		"index.js",
+		"fastlist.exe"
 	],
 	"keywords": [
 		"ps",
@@ -27,11 +28,8 @@
 		"running",
 		"tasklist"
 	],
-	"dependencies": {
-		"pify": "^4.0.0"
-	},
 	"devDependencies": {
-		"ava": "*",
-		"xo": "*"
+		"ava": "^0.25.0",
+		"xo": "^0.23.0"
 	}
 }
