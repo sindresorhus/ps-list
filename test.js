@@ -12,7 +12,8 @@ test('main', async t => {
 		list.every(x =>
 			typeof x.pid === 'number' &&
 			typeof x.name === 'string' &&
-			typeof x.ppid === 'number'
+			typeof x.ppid === 'number' &&
+			typeof x.uid === 'number'
 		)
 	);
 
