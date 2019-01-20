@@ -19,11 +19,11 @@ const psList = require('ps-list');
 
 (async () => {
 	console.log(await psList());
-	//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, cpu: 0.1, memory: 1.5}, …]
+	//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
 })();
 ```
 
-> The `cmd`, `cpu`, and `memory` properties are not supported on Windows.
+> The `cmd`, `cpu`, `memory`, and `uid` properties are not supported on Windows.
 
 
 ## API

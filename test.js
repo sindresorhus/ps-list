@@ -21,7 +21,8 @@ test('main', async t => {
 			list.every(x =>
 				typeof x.cmd === 'string' &&
 				typeof x.cpu === 'number' &&
-				typeof x.memory === 'number'
+				typeof x.memory === 'number' &&
+				typeof x.uid === 'number'
 			)
 		);
 	}
