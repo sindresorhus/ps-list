@@ -30,7 +30,11 @@ test('main', async t => {
 });
 
 if (!isWindows) {
-	const spawnDummy = name => childProcess.spawn(`bash -c "exec -a '${name}' sleep 60"`, {shell: true});
+	const spawnDummy = name => childProcess.spawn(
+		`bash -c "exec -a '${name}' sleep 60"`,
+		[],
+		{shell: true}
+	);
 
 	test('process names', async t => {
 		const cases = [
