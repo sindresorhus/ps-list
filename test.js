@@ -1,3 +1,4 @@
+import childProcess from 'child_process';
 import test from 'ava';
 import psList from '.';
 
@@ -27,3 +28,28 @@ test('main', async t => {
 		);
 	}
 });
+
+if (!isWindows) {
+	const spawnDummy = name => childProcess.spawn(`bash -c "exec -a '${name}' sleep 60"`, {shell: true});
+
+	test('process names', async t => {
+		const cases = [
+			[spawnDummy('foo'), 'foo'],
+			[spawnDummy('foobarbazfoobarbazfoobarbaz'), 'foobarbazfoobarbazfoobarbaz'],
+			[spawnDummy('/foo/foobarbazfoobarbazfoobarbaz'), 'foobarbazfoobarbazfoobarbaz'],
+			[spawnDummy('/foo/bar --bar baz'), 'bar'],
+			[spawnDummy('baz --bar baz'), 'baz'],
+			[spawnDummy('[foo]'), '[foo]']
+		];
+
+		const list = await psList();
+
+		cases.forEach(c => c[0].kill());
+
+		t.true(
+			cases.every(c =>
+				list.some(x => x.name === c[1])
+			)
+		);
+	});
+}

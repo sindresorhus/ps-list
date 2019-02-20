@@ -27,7 +27,7 @@ const main = async (options = {}) => {
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 	const ret = {};
 
-	await Promise.all(['comm', 'args', 'ppid', 'uid', '%cpu', '%mem'].map(async cmd => {
+	await Promise.all(['cmd', 'ppid', 'uid', '%cpu', '%mem'].map(async cmd => {
 		const {stdout} = await execFile('ps', [flags, `pid,${cmd}`], {maxBuffer: TEN_MEGABYTES});
 
 		for (let line of stdout.trim().split('\n').slice(1)) {
@@ -46,16 +46,28 @@ const main = async (options = {}) => {
 	// Filter out inconsistencies as there might be race
 	// issues due to differences in `ps` between the spawns
 	return Object.entries(ret)
-		.filter(([, value]) => value.comm && value.args && value.ppid && value.uid && value['%cpu'] && value['%mem'])
-		.map(([key, value]) => ({
-			pid: Number.parseInt(key, 10),
-			name: path.basename(value.comm),
-			cmd: value.args,
-			ppid: Number.parseInt(value.ppid, 10),
-			uid: Number.parseInt(value.uid, 10),
-			cpu: Number.parseFloat(value['%cpu']),
-			memory: Number.parseFloat(value['%mem'])
-		}));
+		.filter(([, value]) => value.cmd && value.ppid && value.uid && value['%cpu'] && value['%mem'])
+		.map(([key, value]) => {
+			let name = value.cmd;
+
+			if (name.includes(' ')) {
+				name = name.substring(0, name.indexOf(' '));
+			}
+
+			if (name.startsWith(path.sep)) {
+				name = path.basename(name);
+			}
+
+			return {
+				pid: Number.parseInt(key, 10),
+				name,
+				cmd: value.cmd,
+				ppid: Number.parseInt(value.ppid, 10),
+				uid: Number.parseInt(value.uid, 10),
+				cpu: Number.parseFloat(value['%cpu']),
+				memory: Number.parseFloat(value['%mem'])
+			};
+		});
 };
 
 module.exports = process.platform === 'win32' ? windows : main;
