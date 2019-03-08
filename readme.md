@@ -41,7 +41,7 @@ Type: `Object`
 Type: `boolean`<br>
 Default: `true`
 
-Return other users' processes as well as your own.
+Include other users' processes as well as your own.
 
 On Windows this has no effect and will always be the users' own processes.
 
