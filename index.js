@@ -51,6 +51,8 @@ const nonWindowsMultipleCalls = async (options = {}) => {
 			pid: Number.parseInt(key, 10),
 			name: path.basename(value.comm),
 			cmd: value.args,
+			path: value.comm,
+			args: value.args.split(value.comm)[1].trim(),
 			ppid: Number.parseInt(value.ppid, 10),
 			uid: Number.parseInt(value.uid, 10),
 			cpu: Number.parseFloat(value['%cpu']),

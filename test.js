@@ -23,6 +23,8 @@ test('main', async t => {
 		t.true(
 			list.every(x =>
 				typeof x.cmd === 'string' &&
+				typeof x.path === 'string' &&
+				typeof x.args === 'string' &&
 				typeof x.cpu === 'number' &&
 				typeof x.memory === 'number' &&
 				typeof x.uid === 'number'

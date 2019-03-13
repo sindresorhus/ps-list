@@ -23,6 +23,16 @@ declare namespace psList {
 		/**
 		Not supported on Windows.
 		*/
+		readonly path?: string;
+
+		/**
+		Not supported on Windows.
+		*/
+		readonly args?: string;
+
+		/**
+		Not supported on Windows.
+		*/
 		readonly cpu?: number;
 
 		/**
@@ -49,7 +59,7 @@ declare const psList: {
 
 	(async () => {
 		console.log(await psList());
-		//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
+		//=> [{pid: 3213, name: 'node', cmd: 'node test.js', path: 'node', args: 'test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
 	})();
 	```
 	*/
