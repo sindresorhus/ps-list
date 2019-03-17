@@ -23,7 +23,7 @@ const windows = async () => {
 		}));
 };
 
-const main = async (options = {}) => {
+const nonWindowsFallback = async (options = {}) => {
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 	const ret = {};
 
@@ -56,6 +56,64 @@ const main = async (options = {}) => {
 			cpu: Number.parseFloat(value['%cpu']),
 			memory: Number.parseFloat(value['%mem'])
 		}));
+};
+
+const RE_PID_PPID_UID_CPU_MEM = /[ \t]*(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+\.\d+)[ \t]+(\d+\.\d+)[ \t]+/;
+const ERROR_MSG_PARSING_FAILED = 'ps output parsing failed';
+const nonWindows = async (options = {}) => {
+	const flags = (options.all === false ? '' : 'a') + 'wwxo';
+
+	let child;
+	const stdout = await new Promise((resolve, reject) => {
+		child = childProcess.execFile('ps', [flags, 'pid,ppid,uid,%cpu,%mem,comm,args'], {maxBuffer: TEN_MEGABYTES}, (err, stdout) => err ? reject(err) : resolve(stdout));
+	});
+	const lines = stdout.trim().split('\n').slice(1);
+	let psIdx = -1;
+	let commPos;
+	let argsPos;
+	const procs = lines.map((line, i) => {
+		const m = RE_PID_PPID_UID_CPU_MEM.exec(line);
+		if (m === null) {
+			throw new Error(ERROR_MSG_PARSING_FAILED);
+		}
+
+		const proc = {
+			pid: Number.parseInt(m[1], 10),
+			ppid: Number.parseInt(m[2], 10),
+			uid: Number.parseInt(m[3], 10),
+			cpu: Number.parseFloat(m[4]),
+			memory: Number.parseFloat(m[5]),
+			name: undefined,
+			cmd: undefined
+		};
+		if (proc.pid === child.pid) {
+			psIdx = i;
+			commPos = line.indexOf('ps', m[0].length);
+			argsPos = line.indexOf('ps', commPos + 2);
+		}
+
+		return proc;
+	});
+
+	if (psIdx === -1 || commPos === -1 || argsPos === -1) {
+		throw new Error(ERROR_MSG_PARSING_FAILED);
+	}
+
+	const commLen = argsPos - commPos;
+	lines.forEach((line, i) => {
+		procs[i].name = line.substr(commPos, commLen).trim();
+		procs[i].cmd = line.substr(argsPos).trim();
+	});
+	procs.splice(psIdx, 1);
+	return procs;
+};
+
+const main = async (options = {}) => {
+	try {
+		return await nonWindows(options);
+	} catch (error) {
+		return nonWindowsFallback(options);
+	}
 };
 
 module.exports = process.platform === 'win32' ? windows : main;
