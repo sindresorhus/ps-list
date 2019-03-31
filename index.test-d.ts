@@ -1,5 +1,6 @@
-import {expectType} from 'tsd-check';
-import psList, {ProcessDescriptor} from '.';
+import {expectType} from 'tsd';
+import psList = require('.');
+import {ProcessDescriptor} from '.';
 
 const processes: ProcessDescriptor[] = await psList();
 psList({all: false});
