@@ -59,4 +59,5 @@ const main = async (options = {}) => {
 };
 
 module.exports = process.platform === 'win32' ? windows : main;
+// TODO: remove this in the next major version
 module.exports.default = module.exports;

@@ -1,43 +1,64 @@
-export interface Options {
-	/**
-	 * Include other users' processes as well as your own.
-	 *
-	 * On Windows this has no effect and will always be the users' own processes.
-	 *
-	 * @default true
-	 */
-	readonly all?: boolean;
+declare namespace psList {
+	interface Options {
+		/**
+		Include other users' processes as well as your own.
+
+		On Windows this has no effect and will always be the users' own processes.
+
+		@default true
+		*/
+		readonly all?: boolean;
+	}
+
+	interface ProcessDescriptor {
+		readonly pid: number;
+		readonly name: string;
+		readonly ppid: number;
+
+		/**
+		Not supported on Windows.
+		*/
+		readonly cmd?: string;
+
+		/**
+		Not supported on Windows.
+		*/
+		readonly cpu?: number;
+
+		/**
+		Not supported on Windows.
+		*/
+		readonly memory?: number;
+
+		/**
+		Not supported on Windows.
+		*/
+		readonly uid?: number;
+	}
 }
 
-export interface ProcessDescriptor {
-	readonly pid: number;
-	readonly name: string;
-	readonly ppid: number;
-
+declare const psList: {
 	/**
-	 * Not supported on Windows.
-	 */
-	readonly cmd?: string;
+	Get running processes.
 
-	/**
-	 * Not supported on Windows.
-	 */
-	readonly cpu?: number;
+	@returns List of running processes.
 
-	/**
-	 * Not supported on Windows.
-	 */
-	readonly memory?: number;
+	@example
+	```
+	import psList = require('ps-list');
 
-	/**
-	 * Not supported on Windows.
-	 */
-	readonly uid?: number;
-}
+	(async () => {
+		console.log(await psList());
+		//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
+	})();
+	```
+	*/
+	(options?: psList.Options): Promise<psList.ProcessDescriptor[]>;
 
-/**
- * Get running processes.
- *
- * @returns List of running processes.
- */
-export default function psList(options?: Options): Promise<ProcessDescriptor[]>;
+	// TODO: remove this in the next major version, refactor the whole definition to:
+	// declare function psList(options?: psList.Options): Promise<psList.ProcessDescriptor[]>;
+	// export = psList;
+	default: typeof psList;
+};
+
+export = psList;
