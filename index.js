@@ -23,7 +23,7 @@ const windows = async () => {
 		}));
 };
 
-const nonWindowsFallback = async (options = {}) => {
+const nonWindowsMultipleCalls = async (options = {}) => {
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 	const ret = {};
 
@@ -58,64 +58,78 @@ const nonWindowsFallback = async (options = {}) => {
 		}));
 };
 
-const RE_PID_PPID_UID_CPU_MEM = /[ \t]*(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+\.\d+)[ \t]+(\d+\.\d+)[ \t]+/;
 const ERROR_MSG_PARSING_FAILED = 'ps output parsing failed';
-const nonWindows = async (options = {}) => {
-	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 
-	let child;
-	const stdout = await new Promise((resolve, reject) => {
-		child = childProcess.execFile('ps', [flags, 'pid,ppid,uid,%cpu,%mem,comm,args'], {maxBuffer: TEN_MEGABYTES}, (err, stdout) => err ? reject(err) : resolve(stdout));
+const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
+// TODO Use named capture groups when targeting Node.js 10+
+const psOutputRegex = /^[ \t]*(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+\.\d+)[ \t]+(\d+\.\d+)[ \t]+/; // Groups: pid, ppid, uid, cpu, mem
+
+const nonWindowsSingleCall = async (options = {}) => {
+	const flags = options.all === false ? 'wwxo' : 'awwxo';
+
+	const [psPid, stdout] = await new Promise((resolve, reject) => {
+		const child = childProcess.execFile('ps', [flags, psFields], {maxBuffer: TEN_MEGABYTES}, (error, stdout) => {
+			if (error === null) {
+				resolve([child.pid, stdout]);
+			} else {
+				reject(error);
+			}
+		});
 	});
-	const lines = stdout.trim().split('\n').slice(1);
-	let psIdx = -1;
-	let commPos;
-	let argsPos;
-	const procs = lines.map((line, i) => {
-		const m = RE_PID_PPID_UID_CPU_MEM.exec(line);
-		if (m === null) {
+
+	const lines = stdout.trim().split('\n');
+	lines.shift();
+
+	let psIndex;
+	let commPosition;
+	let argsPosition;
+
+	const processes = lines.map((line, i) => {
+		const match = psOutputRegex.exec(line);
+		if (match === null) {
 			throw new Error(ERROR_MSG_PARSING_FAILED);
 		}
 
-		const proc = {
-			pid: Number.parseInt(m[1], 10),
-			ppid: Number.parseInt(m[2], 10),
-			uid: Number.parseInt(m[3], 10),
-			cpu: Number.parseFloat(m[4]),
-			memory: Number.parseFloat(m[5]),
+		const process = {
+			pid: Number.parseInt(match[1], 10),
+			ppid: Number.parseInt(match[2], 10),
+			uid: Number.parseInt(match[3], 10),
+			cpu: Number.parseFloat(match[4]),
+			memory: Number.parseFloat(match[5]),
 			name: undefined,
 			cmd: undefined
 		};
-		if (proc.pid === child.pid) {
-			psIdx = i;
-			commPos = line.indexOf('ps', m[0].length);
-			argsPos = line.indexOf('ps', commPos + 2);
+		if (process.pid === psPid) {
+			psIndex = i;
+			commPosition = line.indexOf('ps', match[0].length);
+			argsPosition = line.indexOf('ps', commPosition + 2);
 		}
 
-		return proc;
+		return process;
 	});
 
-	if (psIdx === -1 || commPos === -1 || argsPos === -1) {
+	if (psIndex === undefined || commPosition === -1 || argsPosition === -1) {
 		throw new Error(ERROR_MSG_PARSING_FAILED);
 	}
 
-	const commLen = argsPos - commPos;
-	lines.forEach((line, i) => {
-		procs[i].name = line.substr(commPos, commLen).trim();
-		procs[i].cmd = line.substr(argsPos).trim();
-	});
-	procs.splice(psIdx, 1);
-	return procs;
+	const commLength = argsPosition - commPosition;
+	for (let i = 0; i < lines.length; i++) {
+		processes[i].name = lines[i].substr(commPosition, commLength).trim();
+		processes[i].cmd = lines[i].substr(argsPosition).trim();
+	}
+
+	processes.splice(psIndex, 1);
+	return processes;
 };
 
-const main = async (options = {}) => {
+const nonWindows = async (options = {}) => {
 	try {
-		return await nonWindows(options);
-	} catch (error) {
-		return nonWindowsFallback(options);
+		return await nonWindowsSingleCall(options);
+	} catch (_) { // If the error is not parsing error it should manifest itself in multicall version too
+		return nonWindowsMultipleCalls(options);
 	}
 };
 
-module.exports = process.platform === 'win32' ? windows : main;
+module.exports = process.platform === 'win32' ? windows : nonWindows;
 // TODO: remove this in the next major version
 module.exports.default = module.exports;
