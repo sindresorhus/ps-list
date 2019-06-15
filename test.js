@@ -32,13 +32,13 @@ test('main', async t => {
 	}
 });
 
-test('some name', async t => {
-	const args = [];
+test('custom binary', async t => {
+	const args = ['./fixtures/sleep-forever.js'];
 	for (let i = 0; i < 100; i++) {
 		args.push(`arg${i}`);
 	}
 
-	const sleepForever = childProcess.spawn('./fixtures/sleep-forever.js', args);
+	const sleepForever = childProcess.spawn(nodeBinaryName, args);
 
 	const list = await psList();
 	await new Promise(resolve => {
@@ -52,7 +52,7 @@ test('some name', async t => {
 	t.is(record.name, nodeBinaryName);
 	t.is(record.ppid, process.pid);
 	if (!isWindows) {
-		t.is(record.cmd, `${nodeBinaryName} ./fixtures/sleep-forever.js ${args.join(' ')}`);
+		t.is(record.cmd, `${nodeBinaryName} ${args.join(' ')}`);
 		t.is(record.uid, process.getuid());
 	}
 });
