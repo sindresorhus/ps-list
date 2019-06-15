@@ -1,6 +1,7 @@
+import childProcess from 'child_process';
+
 import test from 'ava';
 import psList from '.';
-import childProcess from 'child_process';
 
 const isWindows = process.platform === 'win32';
 
@@ -32,8 +33,8 @@ test('main', async t => {
 });
 
 test('some name', async t => {
-	let args = [];
-	for(let i = 0; i < 100; i++) {
+	const args = [];
+	for (let i = 0; i < 100; i++) {
 		args.push(`arg${i}`);
 	}
 
