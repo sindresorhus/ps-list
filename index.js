@@ -113,9 +113,9 @@ const nonWindowsSingleCall = async (options = {}) => {
 	}
 
 	const commLength = argsPosition - commPosition;
-	for (let i = 0; i < lines.length; i++) {
-		processes[i].name = lines[i].substr(commPosition, commLength).trim();
-		processes[i].cmd = lines[i].substr(argsPosition).trim();
+	for (const [i, line] of lines.entries()) {
+		processes[i].name = line.slice(commPosition, commPosition + commLength).trim();
+		processes[i].cmd = line.slice(argsPosition).trim();
 	}
 
 	processes.splice(psIndex, 1);
