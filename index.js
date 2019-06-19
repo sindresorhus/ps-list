@@ -58,10 +58,11 @@ const nonWindowsMultipleCalls = async (options = {}) => {
 		}));
 };
 
-const ERROR_MSG_PARSING_FAILED = 'ps output parsing failed';
+const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
 
 const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
-// TODO Use named capture groups when targeting Node.js 10+
+
+// TODO: Use named capture groups when targeting Node.js 10
 const psOutputRegex = /^[ \t]*(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+\.\d+)[ \t]+(\d+\.\d+)[ \t]+/; // Groups: pid, ppid, uid, cpu, mem
 
 const nonWindowsSingleCall = async (options = {}) => {
@@ -87,7 +88,7 @@ const nonWindowsSingleCall = async (options = {}) => {
 	const processes = lines.map((line, i) => {
 		const match = psOutputRegex.exec(line);
 		if (match === null) {
-			throw new Error(ERROR_MSG_PARSING_FAILED);
+			throw new Error(ERROR_MESSAGE_PARSING_FAILED);
 		}
 
 		const process = {
@@ -109,7 +110,7 @@ const nonWindowsSingleCall = async (options = {}) => {
 	});
 
 	if (psIndex === undefined || commPosition === -1 || argsPosition === -1) {
-		throw new Error(ERROR_MSG_PARSING_FAILED);
+		throw new Error(ERROR_MESSAGE_PARSING_FAILED);
 	}
 
 	const commLength = argsPosition - commPosition;
