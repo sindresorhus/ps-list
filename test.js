@@ -1,5 +1,4 @@
 import childProcess from 'child_process';
-
 import test from 'ava';
 import psList from '.';
 
