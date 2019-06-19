@@ -40,9 +40,13 @@ test('custom binary', async t => {
 	const sleepForever = childProcess.spawn(nodeBinaryName, args);
 
 	const list = await psList();
+
 	await new Promise(resolve => {
 		sleepForever.kill(9);
-		sleepForever.once('exit', () => resolve());
+
+		sleepForever.once('exit', () => {
+			resolve();
+		});
 	});
 
 	const record = list.find(process => process.pid === sleepForever.pid);
@@ -50,6 +54,7 @@ test('custom binary', async t => {
 	t.is(record.pid, sleepForever.pid);
 	t.is(record.name, nodeBinaryName);
 	t.is(record.ppid, process.pid);
+
 	if (!isWindows) {
 		t.is(record.cmd, `${nodeBinaryName} ${args.join(' ')}`);
 		t.is(record.uid, process.getuid());
