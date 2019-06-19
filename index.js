@@ -125,7 +125,7 @@ const nonWindowsSingleCall = async (options = {}) => {
 const nonWindows = async (options = {}) => {
 	try {
 		return await nonWindowsSingleCall(options);
-	} catch (_) { // If the error is not parsing error it should manifest itself in multicall version too
+	} catch (_) { // If the error is not a parsing error, it should manifest itself in multicall version too
 		return nonWindowsMultipleCalls(options);
 	}
 };
