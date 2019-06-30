@@ -1,6 +1,6 @@
 {
 	"name": "ps-list",
-	"version": "6.1.0",
+	"version": "6.3.0",
 	"description": "Get running processes",
 	"license": "MIT",
 	"repository": "sindresorhus/ps-list",
@@ -13,10 +13,11 @@
 		"node": ">=8"
 	},
 	"scripts": {
-		"test": "xo && ava"
+		"test": "xo && ava && tsd"
 	},
 	"files": [
 		"index.js",
+		"index.d.ts",
 		"fastlist.exe"
 	],
 	"keywords": [
@@ -29,7 +30,8 @@
 		"tasklist"
 	],
 	"devDependencies": {
-		"ava": "^0.25.0",
-		"xo": "^0.23.0"
+		"ava": "^1.4.1",
+		"tsd": "^0.7.1",
+		"xo": "^0.24.0"
 	}
 }
