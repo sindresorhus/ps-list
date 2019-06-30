@@ -80,7 +80,7 @@ if (!isWindows) {
 
 		const list = await psList();
 
-		cases.forEach(c => c[0].kill());
+		cases.forEach(c => c[0].kill(9));
 
 		t.true(
 			cases.every(c =>

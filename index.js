@@ -6,6 +6,19 @@ const childProcess = require('child_process');
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 const execFile = util.promisify(childProcess.execFile);
 
+// Extracts the name from the executed command
+const nameFromCmd = cmd => {
+	if (cmd.includes(' ')) {
+		cmd = cmd.substring(0, cmd.indexOf(' '));
+	}
+
+	if (cmd.startsWith(path.sep)) {
+		cmd = path.basename(cmd);
+	}
+
+	return cmd;
+};
+
 const windows = async () => {
 	// Source: https://github.com/MarkTiedemann/fastlist
 	const bin = path.join(__dirname, 'fastlist.exe');
@@ -48,19 +61,9 @@ const nonWindowsMultipleCalls = async (options = {}) => {
 	return Object.entries(ret)
 		.filter(([, value]) => value.cmd && value.ppid && value.uid && value['%cpu'] && value['%mem'])
 		.map(([key, value]) => {
-			let name = value.cmd;
-
-			if (name.includes(' ')) {
-				name = name.substring(0, name.indexOf(' '));
-			}
-
-			if (name.startsWith(path.sep)) {
-				name = path.basename(name);
-			}
-
 			return {
 				pid: Number.parseInt(key, 10),
-				name,
+				name: nameFromCmd(value.cmd),
 				cmd: value.cmd,
 				ppid: Number.parseInt(value.ppid, 10),
 				uid: Number.parseInt(value.uid, 10),
@@ -72,10 +75,10 @@ const nonWindowsMultipleCalls = async (options = {}) => {
 
 const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
 
-const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
+const psFields = 'pid,ppid,uid,%cpu,%mem,cmd';
 
 // TODO: Use named capture groups when targeting Node.js 10
-const psOutputRegex = /^[ \t]*(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+\.\d+)[ \t]+(\d+\.\d+)[ \t]+/; // Groups: pid, ppid, uid, cpu, mem
+const psOutputRegex = /^[ \t]*(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+\.\d+)[ \t]+(\d+\.\d+)[ \t]+(.+)/; // Groups: pid, ppid, uid, cpu, mem, cmd
 
 const nonWindowsSingleCall = async (options = {}) => {
 	const flags = options.all === false ? 'wwxo' : 'awwxo';
@@ -95,8 +98,6 @@ const nonWindowsSingleCall = async (options = {}) => {
 	lines.shift();
 
 	let psIndex;
-	let commPosition;
-	let argsPosition;
 
 	const processes = lines.map((line, i) => {
 		const match = psOutputRegex.exec(line);
@@ -110,26 +111,18 @@ const nonWindowsSingleCall = async (options = {}) => {
 			uid: Number.parseInt(match[3], 10),
 			cpu: Number.parseFloat(match[4]),
 			memory: Number.parseFloat(match[5]),
-			name: undefined,
-			cmd: undefined
+			name: nameFromCmd(match[6]),
+			cmd: match[6]
 		};
 		if (process.pid === psPid) {
 			psIndex = i;
-			commPosition = line.indexOf('ps', match[0].length);
-			argsPosition = line.indexOf('ps', commPosition + 2);
 		}
 
 		return process;
 	});
 
-	if (psIndex === undefined || commPosition === -1 || argsPosition === -1) {
+	if (psIndex === undefined) {
 		throw new Error(ERROR_MESSAGE_PARSING_FAILED);
-	}
-
-	const commLength = argsPosition - commPosition;
-	for (const [i, line] of lines.entries()) {
-		processes[i].name = line.slice(commPosition, commPosition + commLength).trim();
-		processes[i].cmd = line.slice(argsPosition).trim();
 	}
 
 	processes.splice(psIndex, 1);
