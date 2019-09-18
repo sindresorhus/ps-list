@@ -2,6 +2,7 @@
 const util = require('util');
 const path = require('path');
 const childProcess = require('child_process');
+const fs = require('fs');
 
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 const execFile = util.promisify(childProcess.execFile);
@@ -45,7 +46,7 @@ const nonWindowsMultipleCalls = async (options = {}) => {
 
 	// Filter out inconsistencies as there might be race
 	// issues due to differences in `ps` between the spawns
-	return Object.entries(ret)
+	const processes = Object.entries(ret)
 		.filter(([, value]) => value.comm && value.args && value.ppid && value.uid && value['%cpu'] && value['%mem'])
 		.map(([key, value]) => ({
 			pid: Number.parseInt(key, 10),
@@ -56,6 +57,14 @@ const nonWindowsMultipleCalls = async (options = {}) => {
 			cpu: Number.parseFloat(value['%cpu']),
 			memory: Number.parseFloat(value['%mem'])
 		}));
+
+	processes.forEach(p => {
+		if (p.name.length === 15) {
+			p.name = nonWindowsGetFullName(p.pid);
+		}
+	});
+
+	return processes;
 };
 
 const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
@@ -120,6 +129,12 @@ const nonWindowsSingleCall = async (options = {}) => {
 		processes[i].cmd = line.slice(argsPosition).trim();
 	}
 
+	processes.forEach(p => {
+		if (p.name.length === 15) {
+			p.name = nonWindowsGetFullName(p.pid);
+		}
+	});
+
 	processes.splice(psIndex, 1);
 	return processes;
 };
@@ -130,6 +145,12 @@ const nonWindows = async (options = {}) => {
 	} catch (_) { // If the error is not a parsing error, it should manifest itself in multicall version too
 		return nonWindowsMultipleCalls(options);
 	}
+};
+
+const nonWindowsGetFullName = pid => {
+	const path = `/proc/${pid}/exe`;
+	const value = fs.readlinkSync(path, 'utf8');
+	return value.split('/')[value.split('/').length - 1].trim();
 };
 
 module.exports = process.platform === 'win32' ? windows : nonWindows;
