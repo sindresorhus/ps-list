@@ -40,10 +40,8 @@ test('custom binary', async t => {
 	const sleepForever = childProcess.spawn(nodeBinaryName, args);
 
 	const list = await psList();
-
 	await new Promise(resolve => {
 		sleepForever.kill(9);
-
 		sleepForever.once('exit', () => {
 			resolve();
 		});
@@ -60,3 +58,59 @@ test('custom binary', async t => {
 		t.is(record.uid, process.getuid());
 	}
 });
+
+test('long executable name', async t => {
+	const binaryName = 'veryVeryLongNameForAExecutableThatOnlySleep';
+	const args = ['dummy', 'dummy with spaces'];
+	const exe = 'fixtures/' + binaryName;
+
+	if (isWindows) {
+		t.pass();
+	} else {
+		const sleepForever = childProcess.spawn(exe, args);
+		const list = await psList();
+
+		await new Promise(resolve => {
+			sleepForever.kill(9);
+
+			sleepForever.once('exit', () => {
+				resolve();
+			});
+		});
+
+		const record = list.find(process => process.pid === sleepForever.pid);
+
+		t.is(record.pid, sleepForever.pid);
+		t.is(record.name, binaryName);
+		t.is(record.ppid, process.pid);
+		t.is(record.uid, process.getuid());
+	}
+});
+
+test('long executable name with spaces', async t => {
+	const binaryName = 'veryVeryLongNameForAExecutableThatOnlySleep with spaces';
+	const args = ['dummy', 'dummy with spaces'];
+	const exe = 'fixtures/' + binaryName;
+	if (isWindows) {
+		t.pass();
+	} else {
+		const sleepForever = childProcess.spawn(exe, args);
+		const list = await psList();
+
+		await new Promise(resolve => {
+			sleepForever.kill(9);
+
+			sleepForever.once('exit', () => {
+				resolve();
+			});
+		});
+
+		const record = list.find(process => process.pid === sleepForever.pid);
+
+		t.is(record.pid, sleepForever.pid);
+		t.is(record.name, binaryName);
+		t.is(record.ppid, process.pid);
+		t.is(record.uid, process.getuid());
+	}
+});
+
