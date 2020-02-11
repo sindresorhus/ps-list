@@ -3,7 +3,6 @@ import test from 'ava';
 import psList from '.';
 
 const isWindows = process.platform === 'win32';
-
 const nodeBinaryName = isWindows ? 'node.exe' : 'node';
 const testBinaryName = isWindows ? nodeBinaryName : 'ava';
 

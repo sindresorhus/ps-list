@@ -37,28 +37,21 @@ declare namespace psList {
 	}
 }
 
-declare const psList: {
-	/**
-	Get running processes.
+/**
+Get running processes.
 
-	@returns List of running processes.
+@returns List of running processes.
 
-	@example
-	```
-	import psList = require('ps-list');
+@example
+```
+import psList = require('ps-list');
 
-	(async () => {
-		console.log(await psList());
-		//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
-	})();
-	```
-	*/
-	(options?: psList.Options): Promise<psList.ProcessDescriptor[]>;
-
-	// TODO: remove this in the next major version, refactor the whole definition to:
-	// declare function psList(options?: psList.Options): Promise<psList.ProcessDescriptor[]>;
-	// export = psList;
-	default: typeof psList;
-};
+(async () => {
+	console.log(await psList());
+	//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
+})();
+```
+*/
+declare function psList(options?: psList.Options): Promise<psList.ProcessDescriptor[]>;
 
 export = psList;

@@ -4,13 +4,11 @@
 
 Works on macOS, Linux, and Windows.
 
-
 ## Install
 
 ```
 $ npm install ps-list
 ```
-
 
 ## Usage
 
@@ -25,27 +23,21 @@ const psList = require('ps-list');
 
 > The `cmd`, `cpu`, `memory`, and `uid` properties are not supported on Windows.
 
-
 ## API
 
-### psList([options])
+### psList(options?)
 
 Returns a `Promise<Array>` with the running processes.
 
 #### options
 
-Type: `Object`
+Type: `object`
 
 ##### all
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `true`
 
 Include other users' processes as well as your own.
 
 On Windows this has no effect and will always be the users' own processes.
-
-
-## License
-
-MIT © [Sindre Sorhus](https://sindresorhus.com)

@@ -66,12 +66,12 @@ const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
 const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
 
 // TODO: Use named capture groups when targeting Node.js 10
-const psOutputRegex = /^[ \t]*(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+\.\d+)[ \t]+(\d+\.\d+)[ \t]+/; // Groups: pid, ppid, uid, cpu, mem
+const psOutputRegex = /^[ \t]*(?<pid>\d+)[ \t]+(?<ppid>\d+)[ \t]+(?<uid>\d+)[ \t]+(?<cpu>\d+\.\d+)[ \t]+(?<memory>\d+\.\d+)[ \t]+/;
 
 const nonWindowsSingleCall = async (options = {}) => {
 	const flags = options.all === false ? 'wwxo' : 'awwxo';
 
-	// TODO: Use the promise version of `execFile` when https://github.com/nodejs/node/issues/28244 is fixed
+	// TODO: Use the promise version of `execFile` when https://github.com/nodejs/node/issues/28244 is fixed.
 	const [psPid, stdout] = await new Promise((resolve, reject) => {
 		const child = childProcess.execFile('ps', [flags, psFields], {maxBuffer: TEN_MEGABYTES}, (error, stdout) => {
 			if (error === null) {
@@ -89,28 +89,31 @@ const nonWindowsSingleCall = async (options = {}) => {
 	let commPosition;
 	let argsPosition;
 
-	const processes = lines.map((line, i) => {
+	const processes = lines.map((line, index) => {
 		const match = psOutputRegex.exec(line);
 		if (match === null) {
 			throw new Error(ERROR_MESSAGE_PARSING_FAILED);
 		}
 
-		const process = {
-			pid: Number.parseInt(match[1], 10),
-			ppid: Number.parseInt(match[2], 10),
-			uid: Number.parseInt(match[3], 10),
-			cpu: Number.parseFloat(match[4]),
-			memory: Number.parseFloat(match[5]),
+		const {pid, ppid, uid, cpu, memory} = match.groups;
+
+		const processInfo = {
+			pid: Number.parseInt(pid, 10),
+			ppid: Number.parseInt(ppid, 10),
+			uid: Number.parseInt(uid, 10),
+			cpu: Number.parseFloat(cpu),
+			memory: Number.parseFloat(memory),
 			name: undefined,
 			cmd: undefined
 		};
-		if (process.pid === psPid) {
-			psIndex = i;
+
+		if (processInfo.pid === psPid) {
+			psIndex = index;
 			commPosition = line.indexOf('ps', match[0].length);
 			argsPosition = line.indexOf('ps', commPosition + 2);
 		}
 
-		return process;
+		return processInfo;
 	});
 
 	if (psIndex === undefined || commPosition === -1 || argsPosition === -1) {
@@ -118,9 +121,9 @@ const nonWindowsSingleCall = async (options = {}) => {
 	}
 
 	const commLength = argsPosition - commPosition;
-	for (const [i, line] of lines.entries()) {
-		processes[i].name = line.slice(commPosition, commPosition + commLength).trim();
-		processes[i].cmd = line.slice(argsPosition).trim();
+	for (const [index, line] of lines.entries()) {
+		processes[index].name = line.slice(commPosition, commPosition + commLength).trim();
+		processes[index].cmd = line.slice(argsPosition).trim();
 	}
 
 	processes.splice(psIndex, 1);
@@ -130,11 +133,9 @@ const nonWindowsSingleCall = async (options = {}) => {
 const nonWindows = async (options = {}) => {
 	try {
 		return await nonWindowsSingleCall(options);
-	} catch (_) { // If the error is not a parsing error, it should manifest itself in multicall version too
+	} catch (_) { // If the error is not a parsing error, it should manifest itself in multicall version too.
 		return nonWindowsMultipleCalls(options);
 	}
 };
 
 module.exports = process.platform === 'win32' ? windows : nonWindows;
-// TODO: remove this in the next major version
-module.exports.default = module.exports;
