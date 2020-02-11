@@ -10,7 +10,10 @@ const windows = async () => {
 	// Source: https://github.com/MarkTiedemann/fastlist
 	const bin = path.join(__dirname, 'fastlist.exe');
 
-	const {stdout} = await execFile(bin, {maxBuffer: TEN_MEGABYTES});
+	const {stdout} = await execFile(bin, {
+		maxBuffer: TEN_MEGABYTES,
+		windowsHide: true
+	});
 
 	return stdout
 		.trim()
