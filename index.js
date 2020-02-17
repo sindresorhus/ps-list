@@ -66,13 +66,12 @@ const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
 const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
 
 // TODO: Use named capture groups when targeting Node.js 10
-const psOutputRegex = /^[ \t]*(?<pid>\d+)[ \t]+(?<ppid>\d+)[ \t]+(?<uid>\d+)[ \t]+(?<cpu>\d+\.\d+)[ \t]+(?<memory>\d+\.\d+)[ \t]+/;
+const psOutputRegex = /^[\s]*(?<pid>\d+)[\s]+(?<ppid>\d+)[\s]+(?<uid>\d+)[\s]+(?<cpu>\d+\.\d+)[\s]+(?<memory>\d+\.\d+)[\s]+(?<comm>[\S]+(?:\s+<defunct>)?)[\s]+(?<args>.*)/;
 
 const nonWindowsSingleCall = async (options = {}) => {
 	const flags = options.all === false ? 'wwxo' : 'awwxo';
 
-	// TODO: Use the promise version of `execFile` when https://github.com/nodejs/node/issues/28244 is fixed.
-	const [psPid, stdout] = await new Promise((resolve, reject) => {
+	const [, stdout] = await new Promise((resolve, reject) => {
 		const child = childProcess.execFile('ps', [flags, psFields], {maxBuffer: TEN_MEGABYTES}, (error, stdout) => {
 			if (error === null) {
 				resolve([child.pid, stdout]);
@@ -85,49 +84,24 @@ const nonWindowsSingleCall = async (options = {}) => {
 	const lines = stdout.trim().split('\n');
 	lines.shift();
 
-	let psIndex;
-	let commPosition;
-	let argsPosition;
-
-	const processes = lines.map((line, index) => {
+	return lines.map(line => {
 		const match = psOutputRegex.exec(line);
 		if (match === null) {
 			throw new Error(ERROR_MESSAGE_PARSING_FAILED);
 		}
 
-		const {pid, ppid, uid, cpu, memory} = match.groups;
-
-		const processInfo = {
+		const {pid, ppid, uid, cpu, memory, comm, args} = match.groups;
+		const divided = args.split(' ');
+		return {
 			pid: Number.parseInt(pid, 10),
 			ppid: Number.parseInt(ppid, 10),
 			uid: Number.parseInt(uid, 10),
 			cpu: Number.parseFloat(cpu),
 			memory: Number.parseFloat(memory),
-			name: undefined,
-			cmd: undefined
+			name: comm,
+			cmd: [path.basename(divided[0]), divided.slice(1).join(' ')].join(' ')
 		};
-
-		if (processInfo.pid === psPid) {
-			psIndex = index;
-			commPosition = line.indexOf('ps', match[0].length);
-			argsPosition = line.indexOf('ps', commPosition + 2);
-		}
-
-		return processInfo;
 	});
-
-	if (psIndex === undefined || commPosition === -1 || argsPosition === -1) {
-		throw new Error(ERROR_MESSAGE_PARSING_FAILED);
-	}
-
-	const commLength = argsPosition - commPosition;
-	for (const [index, line] of lines.entries()) {
-		processes[index].name = line.slice(commPosition, commPosition + commLength).trim();
-		processes[index].cmd = line.slice(argsPosition).trim();
-	}
-
-	processes.splice(psIndex, 1);
-	return processes;
 };
 
 const nonWindows = async (options = {}) => {
@@ -139,3 +113,4 @@ const nonWindows = async (options = {}) => {
 };
 
 module.exports = process.platform === 'win32' ? windows : nonWindows;
+
