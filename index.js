@@ -65,8 +65,7 @@ const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
 
 const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
 
-// TODO: Use named capture groups when targeting Node.js 10
-const psOutputRegex = /^[\s]*(?<pid>\d+)[\s]+(?<ppid>\d+)[\s]+(?<uid>\d+)[\s]+(?<cpu>\d+\.\d+)[\s]+(?<memory>\d+\.\d+)[\s]+(?<comm>[\S]+(?:\s+<defunct>)?)[\s]+(?<args>.*)/;
+const psOutputRegex = /^[\s]*(?<pid>\d+)[\s]+(?<ppid>\d+)[\s]+(?<uid>\d+)[\s]+(?<cpu>\d+\.\d+)[\s]+(?<memory>\d+\.\d+)[\s]+(?<commAndArgs>.*)/;
 
 const nonWindowsSingleCall = async (options = {}) => {
 	const flags = options.all === false ? 'wwxo' : 'awwxo';
@@ -82,6 +81,7 @@ const nonWindowsSingleCall = async (options = {}) => {
 	});
 
 	const lines = stdout.trim().split('\n');
+	const COMMAND_POSITION = lines[0].lastIndexOf('COMMAND') - lines[0].indexOf('COMMAND');
 	lines.shift();
 
 	return lines.map(line => {
@@ -90,8 +90,13 @@ const nonWindowsSingleCall = async (options = {}) => {
 			throw new Error(ERROR_MESSAGE_PARSING_FAILED);
 		}
 
-		const {pid, ppid, uid, cpu, memory, comm, args} = match.groups;
-		const divided = args.split(' ');
+		const {pid, ppid, uid, cpu, memory, commAndArgs} = match.groups;
+		const comm = commAndArgs.slice(0, COMMAND_POSITION).trim();
+		if (comm === 'ps') {
+			return null;
+		}
+
+		const args = commAndArgs.slice(COMMAND_POSITION);
 		return {
 			pid: Number.parseInt(pid, 10),
 			ppid: Number.parseInt(ppid, 10),
@@ -99,9 +104,9 @@ const nonWindowsSingleCall = async (options = {}) => {
 			cpu: Number.parseFloat(cpu),
 			memory: Number.parseFloat(memory),
 			name: comm,
-			cmd: [path.basename(divided[0]), divided.slice(1).join(' ')].join(' ')
+			cmd: args
 		};
-	});
+	}).filter(line => line);
 };
 
 const nonWindows = async (options = {}) => {
