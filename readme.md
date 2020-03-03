@@ -44,12 +44,13 @@ const checkProcess = async (param) => {
 	if (typeof param !== 'object' || Object.keys(param).length === 0) return founds;
 
 	for (let i = 0; i < list.length; i++) {
-		let found;
+		let found = true;
 
 		for (const k in param) {
 			if (!param.hasOwnProperty(k)) continue;
-			let re = new RegExp(param[k], '')
-			found = (list[i][k].match(re)) ? true : false;
+			let re = new RegExp(param[k], 'i');
+			let test = re.test(list[i][k]);
+			if (!test) found = false;
 		}
 
 		if (found) founds.push(list[i]);
