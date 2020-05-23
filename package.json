@@ -19,7 +19,8 @@
 	"files": [
 		"index.js",
 		"index.d.ts",
-		"fastlist.exe"
+		"fastlist-0.2.1-x64.exe",
+		"fastlist-0.2.1-x86.exe"
 	],
 	"keywords": [
 		"ps",

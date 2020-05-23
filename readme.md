@@ -41,3 +41,7 @@ Default: `true`
 Include other users' processes as well as your own.
 
 On Windows this has no effect and will always be the users' own processes.
+
+## Related
+
+- [fastlist](https://github.com/MarkTiedemann/fastlist) - The binary used in this module to list the running processes on Windows.
