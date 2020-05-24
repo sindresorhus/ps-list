@@ -44,4 +44,4 @@ On Windows this has no effect and will always be the users' own processes.
 
 ## Related
 
-- [fastlist](https://github.com/MarkTiedemann/fastlist) - The binary used in this module to list the running processes on Windows.
+- [fastlist](https://github.com/MarkTiedemann/fastlist) - The binary used in this module to list the running processes on Windows
