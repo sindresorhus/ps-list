@@ -17,7 +17,7 @@ const windows = async () => {
 			bin = 'fastlist-0.2.1-x86.exe';
 			break;
 		default:
-			throw new Error('Unsupported architecture: ' + process.arch);
+			throw new Error(`Unsupported architecture: ${process.arch}`);
 	}
 
 	const binPath = path.join(__dirname, bin);
