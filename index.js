@@ -20,7 +20,7 @@ const windows = async () => {
 			throw new Error(`Unsupported architecture: ${process.arch}`);
 	}
 
-	const binPath = path.join(__dirname, bin);
+	const binPath = path.join(__dirname, 'vendor', bin);
 	const {stdout} = await execFile(binPath, {
 		maxBuffer: TEN_MEGABYTES,
 		windowsHide: true
