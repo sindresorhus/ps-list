@@ -8,9 +8,20 @@ const execFile = util.promisify(childProcess.execFile);
 
 const windows = async () => {
 	// Source: https://github.com/MarkTiedemann/fastlist
-	const bin = path.join(__dirname, 'fastlist.exe');
+	let bin;
+	switch (process.arch) {
+		case 'x64':
+			bin = 'fastlist-0.2.1-x64.exe';
+			break;
+		case 'ia32':
+			bin = 'fastlist-0.2.1-x86.exe';
+			break;
+		default:
+			throw new Error(`Unsupported architecture: ${process.arch}`);
+	}
 
-	const {stdout} = await execFile(bin, {
+	const binPath = path.join(__dirname, 'vendor', bin);
+	const {stdout} = await execFile(binPath, {
 		maxBuffer: TEN_MEGABYTES,
 		windowsHide: true
 	});
@@ -19,10 +30,10 @@ const windows = async () => {
 		.trim()
 		.split('\r\n')
 		.map(line => line.split('\t'))
-		.map(([name, pid, ppid]) => ({
-			name,
+		.map(([pid, ppid, name]) => ({
 			pid: Number.parseInt(pid, 10),
-			ppid: Number.parseInt(ppid, 10)
+			ppid: Number.parseInt(ppid, 10),
+			name
 		}));
 };
 

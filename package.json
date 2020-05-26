@@ -19,7 +19,7 @@
 	"files": [
 		"index.js",
 		"index.d.ts",
-		"fastlist.exe"
+		"vendor/*.exe"
 	],
 	"keywords": [
 		"ps",
