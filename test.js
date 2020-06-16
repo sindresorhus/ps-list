@@ -8,7 +8,6 @@ const testBinaryName = isWindows ? nodeBinaryName : 'ava';
 
 test('main', async t => {
 	const list = await psList();
-	console.log(list.slice(-10));
 
 	t.true(list.some(x => x.name.includes(testBinaryName)));
 	t.true(
