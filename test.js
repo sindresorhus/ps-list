@@ -14,6 +14,7 @@ test('main', async t => {
 	} else {
 		t.true(list.some(x => x.cmd.includes(testBinaryName)));
 	}
+
 	t.true(
 		list.every(x =>
 			typeof x.pid === 'number' &&
