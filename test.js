@@ -9,7 +9,12 @@ const testBinaryName = isWindows ? nodeBinaryName : 'ava';
 test('main', async t => {
 	const list = await psList();
 
-	t.true(list.some(x => x.name.includes(testBinaryName)));
+	if (isWindows) {
+		t.true(list.some(x => x.name.includes(testBinaryName)));
+	} else {
+		t.true(list.some(x => x.cmd.includes(testBinaryName)));
+	}
+
 	t.true(
 		list.every(x =>
 			typeof x.pid === 'number' &&
