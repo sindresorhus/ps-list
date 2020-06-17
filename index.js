@@ -11,10 +11,10 @@ const windows = async () => {
 	let bin;
 	switch (process.arch) {
 		case 'x64':
-			bin = 'fastlist-0.2.1-x64.exe';
+			bin = 'fastlist-0.3.0-x64.exe';
 			break;
 		case 'ia32':
-			bin = 'fastlist-0.2.1-x86.exe';
+			bin = 'fastlist-0.3.0-x86.exe';
 			break;
 		default:
 			throw new Error(`Unsupported architecture: ${process.arch}`);
