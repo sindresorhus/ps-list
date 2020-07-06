@@ -108,9 +108,7 @@ const nonWindowsSingleCall = async (options = {}) => {
 			name: comm,
 			cmd: args
 		};
-	}).filter(processData => {
-		return processData !== false;
-	});
+	}).filter(processData => processData !== false);
 };
 
 const nonWindows = async (options = {}) => {
@@ -122,4 +120,3 @@ const nonWindows = async (options = {}) => {
 };
 
 module.exports = process.platform === 'win32' ? windows : nonWindows;
-
