@@ -70,6 +70,7 @@ const psOutputRegex = /^[\s]*(?<pid>\d+)[\s]+(?<ppid>\d+)[\s]+(?<uid>\d+)[\s]+(?
 const nonWindowsSingleCall = async (options = {}) => {
 	const flags = options.all === false ? 'wwxo' : 'awwxo';
 
+	// TODO: Use the promise version of `execFile` when https://github.com/nodejs/node/issues/28244 is fixed.
 	const [psPID, stdout] = await new Promise((resolve, reject) => {
 		const child = childProcess.execFile('ps', [flags, psFields], {maxBuffer: TEN_MEGABYTES}, (error, stdout) => {
 			if (error === null) {
@@ -92,8 +93,9 @@ const nonWindowsSingleCall = async (options = {}) => {
 
 		const {pid, ppid, uid, cpu, memory, commAndArgs} = match.groups;
 		const comm = commAndArgs.slice(0, COMMAND_POSITION).trim();
+
 		if (psPID === pid) {
-			return null;
+			return false;
 		}
 
 		const args = commAndArgs.slice(COMMAND_POSITION);
@@ -107,7 +109,7 @@ const nonWindowsSingleCall = async (options = {}) => {
 			cmd: args
 		};
 	}).filter(processData => {
-		return processData !== null;
+		return processData !== false;
 	});
 };
 
