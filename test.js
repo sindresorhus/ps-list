@@ -1,5 +1,6 @@
 import childProcess from 'child_process';
 import test from 'ava';
+import noopProcess from 'noop-process';
 import psList from '.';
 
 const isWindows = process.platform === 'win32';
@@ -62,5 +63,17 @@ test('custom binary', async t => {
 	if (!isWindows) {
 		t.is(record.cmd, `${nodeBinaryName} ${args.join(' ')}`);
 		t.is(record.uid, process.getuid());
+	}
+});
+
+test('process name', async t => {
+	const title = 'noop-process';
+	const pid = await noopProcess({title});
+
+	const processes = await psList();
+	for (const ps of processes) {
+		if (ps.pid === pid) {
+			t.is(ps.name, title);
+		}
 	}
 });
