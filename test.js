@@ -1,5 +1,7 @@
 import childProcess from 'child_process';
 import test from 'ava';
+import noopProcess from 'noop-process';
+import semver from 'semver';
 import psList from '.';
 
 const isWindows = process.platform === 'win32';
@@ -64,3 +66,18 @@ test('custom binary', async t => {
 		t.is(record.uid, process.getuid());
 	}
 });
+
+if (process.platform === 'linux' && semver.gte(process.version, '12.17.0')) {
+	// https://github.com/nodejs/node/issues/35503
+	test.failing('process name can\'t work in Linux on Node.js >=12.17', async t => {
+		const title = 'noop-process';
+		const pid = await noopProcess({title});
+
+		const processes = await psList();
+		for (const ps of processes) {
+			if (ps.pid === pid) {
+				t.is(ps.name, title);
+			}
+		}
+	});
+}
