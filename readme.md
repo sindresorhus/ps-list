@@ -4,13 +4,11 @@
 
 Works on macOS, Linux, and Windows.
 
-
 ## Install
 
 ```
 $ npm install ps-list
 ```
-
 
 ## Usage
 
@@ -25,7 +23,7 @@ const psList = require('ps-list');
 
 ## API
 
-### psList([options])
+### psList(options?)
 
 Returns a `Promise<Array>` with the running processes.
 
@@ -35,18 +33,17 @@ The `cmd`, `cpu`, `memory`, and `uid` properties are not supported on Windows.
 
 #### options
 
-Type: `Object`
+Type: `object`
 
 ##### all
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `true`
 
 Include other users' processes as well as your own.
 
 On Windows this has no effect and will always be the users' own processes.
 
+## Related
 
-## License
-
-MIT © [Sindre Sorhus](https://sindresorhus.com)
+- [fastlist](https://github.com/MarkTiedemann/fastlist) - The binary used in this module to list the running processes on Windows

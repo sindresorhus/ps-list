@@ -8,22 +8,36 @@ const execFile = util.promisify(childProcess.execFile);
 
 const windows = async () => {
 	// Source: https://github.com/MarkTiedemann/fastlist
-	const bin = path.join(__dirname, 'fastlist.exe');
+	let bin;
+	switch (process.arch) {
+		case 'x64':
+			bin = 'fastlist-0.3.0-x64.exe';
+			break;
+		case 'ia32':
+			bin = 'fastlist-0.3.0-x86.exe';
+			break;
+		default:
+			throw new Error(`Unsupported architecture: ${process.arch}`);
+	}
 
-	const {stdout} = await execFile(bin, {maxBuffer: TEN_MEGABYTES});
+	const binPath = path.join(__dirname, 'vendor', bin);
+	const {stdout} = await execFile(binPath, {
+		maxBuffer: TEN_MEGABYTES,
+		windowsHide: true
+	});
 
 	return stdout
 		.trim()
 		.split('\r\n')
 		.map(line => line.split('\t'))
-		.map(([name, pid, ppid]) => ({
-			name,
+		.map(([pid, ppid, name]) => ({
 			pid: Number.parseInt(pid, 10),
-			ppid: Number.parseInt(ppid, 10)
+			ppid: Number.parseInt(ppid, 10),
+			name
 		}));
 };
 
-const main = async (options = {}) => {
+const nonWindowsMultipleCalls = async (options = {}) => {
 	const flags = (options.all === false ? '' : 'a') + 'wwxo';
 	const ret = {};
 
@@ -58,5 +72,81 @@ const main = async (options = {}) => {
 		}));
 };
 
-module.exports = process.platform === 'win32' ? windows : main;
-module.exports.default = module.exports;
+const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
+
+const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
+
+// TODO: Use named capture groups when targeting Node.js 10
+const psOutputRegex = /^[ \t]*(?<pid>\d+)[ \t]+(?<ppid>\d+)[ \t]+(?<uid>\d+)[ \t]+(?<cpu>\d+\.\d+)[ \t]+(?<memory>\d+\.\d+)[ \t]+/;
+
+const nonWindowsSingleCall = async (options = {}) => {
+	const flags = options.all === false ? 'wwxo' : 'awwxo';
+
+	// TODO: Use the promise version of `execFile` when https://github.com/nodejs/node/issues/28244 is fixed.
+	const [psPid, stdout] = await new Promise((resolve, reject) => {
+		const child = childProcess.execFile('ps', [flags, psFields], {maxBuffer: TEN_MEGABYTES}, (error, stdout) => {
+			if (error === null) {
+				resolve([child.pid, stdout]);
+			} else {
+				reject(error);
+			}
+		});
+	});
+
+	const lines = stdout.trim().split('\n');
+	lines.shift();
+
+	let psIndex;
+	let commPosition;
+	let argsPosition;
+
+	const processes = lines.map((line, index) => {
+		const match = psOutputRegex.exec(line);
+		if (match === null) {
+			throw new Error(ERROR_MESSAGE_PARSING_FAILED);
+		}
+
+		const {pid, ppid, uid, cpu, memory} = match.groups;
+
+		const processInfo = {
+			pid: Number.parseInt(pid, 10),
+			ppid: Number.parseInt(ppid, 10),
+			uid: Number.parseInt(uid, 10),
+			cpu: Number.parseFloat(cpu),
+			memory: Number.parseFloat(memory),
+			name: undefined,
+			cmd: undefined
+		};
+
+		if (processInfo.pid === psPid) {
+			psIndex = index;
+			commPosition = line.indexOf('ps', match[0].length);
+			argsPosition = line.indexOf('ps', commPosition + 2);
+		}
+
+		return processInfo;
+	});
+
+	if (psIndex === undefined || commPosition === -1 || argsPosition === -1) {
+		throw new Error(ERROR_MESSAGE_PARSING_FAILED);
+	}
+
+	const commLength = argsPosition - commPosition;
+	for (const [index, line] of lines.entries()) {
+		processes[index].name = line.slice(commPosition, commPosition + commLength).trim();
+		processes[index].cmd = line.slice(argsPosition).trim();
+	}
+
+	processes.splice(psIndex, 1);
+	return processes;
+};
+
+const nonWindows = async (options = {}) => {
+	try {
+		return await nonWindowsSingleCall(options);
+	} catch (_) { // If the error is not a parsing error, it should manifest itself in multicall version too.
+		return nonWindowsMultipleCalls(options);
+	}
+};
+
+module.exports = process.platform === 'win32' ? windows : nonWindows;
