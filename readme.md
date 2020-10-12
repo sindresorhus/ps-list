@@ -23,15 +23,15 @@ const psList = require('ps-list');
 })();
 ```
 
-> The `cmd`, `cpu`, `memory`, and `uid` properties are not supported on Windows.
-> On Linux and OS X the `name` property is truncated to 15 characters. `cmd` property can be used to extract full name in that case.
-
-
 ## API
 
 ### psList([options])
 
 Returns a `Promise<Array>` with the running processes.
+
+On macOS and Linux, the `name` property is truncated to 15 characters by the system. The `cmd` property can be used to extract the full name.
+
+The `cmd`, `cpu`, `memory`, and `uid` properties are not supported on Windows.
 
 #### options
 
