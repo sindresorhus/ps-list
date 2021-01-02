@@ -1,4 +1,4 @@
-# ps-list [![Build Status](https://travis-ci.org/sindresorhus/ps-list.svg?branch=master)](https://travis-ci.org/sindresorhus/ps-list)
+# ps-list
 
 > Get running processes
 
