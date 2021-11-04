@@ -34,7 +34,6 @@
 	],
 	"devDependencies": {
 		"ava": "^3.15.0",
-		"noop-process": "^5.0.0",
 		"tsd": "^0.18.0",
 		"xo": "^0.46.4"
 	}
