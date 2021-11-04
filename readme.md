@@ -6,26 +6,24 @@ Works on macOS, Linux, and Windows.
 
 ## Install
 
-```
-$ npm install ps-list
+```sh
+npm install ps-list
 ```
 
 ## Usage
 
 ```js
-const psList = require('ps-list');
+import psList from 'ps-list';
 
-(async () => {
-	console.log(await psList());
-	//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
-})();
+console.log(await psList());
+//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5}, …]
 ```
 
 ## API
 
 ### psList(options?)
 
-Returns a `Promise<Array>` with the running processes.
+Returns a `Promise<object[]>` with the running processes.
 
 On macOS and Linux, the `name` property is truncated to 15 characters by the system. The `cmd` property can be used to extract the full name.
 

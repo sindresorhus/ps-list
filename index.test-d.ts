@@ -1,9 +1,8 @@
 import {expectType} from 'tsd';
-import psList = require('.');
-import {ProcessDescriptor} from '.';
+import psList, {ProcessDescriptor} from './index.js';
 
 const processes: ProcessDescriptor[] = await psList();
-psList({all: false});
+await psList({all: false});
 
 expectType<number>(processes[0].pid);
 expectType<string>(processes[0].name);

@@ -1,8 +1,8 @@
-import childProcess from 'child_process';
+import process from 'node:process';
+import childProcess from 'node:child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
-import semver from 'semver';
-import psList from '.';
+import psList from './index.js';
 
 const isWindows = process.platform === 'win32';
 const nodeBinaryName = isWindows ? 'node.exe' : 'node';
@@ -19,20 +19,20 @@ test('main', async t => {
 
 	t.true(
 		list.every(x =>
-			typeof x.pid === 'number' &&
-			typeof x.name === 'string' &&
-			typeof x.ppid === 'number'
-		)
+			typeof x.pid === 'number'
+			&& typeof x.name === 'string'
+			&& typeof x.ppid === 'number',
+		),
 	);
 
 	if (!isWindows) {
 		t.true(
 			list.every(x =>
-				typeof x.cmd === 'string' &&
-				typeof x.cpu === 'number' &&
-				typeof x.memory === 'number' &&
-				typeof x.uid === 'number'
-			)
+				typeof x.cmd === 'string'
+				&& typeof x.cpu === 'number'
+				&& typeof x.memory === 'number'
+				&& typeof x.uid === 'number',
+			),
 		);
 	}
 });
@@ -67,7 +67,7 @@ test('custom binary', async t => {
 	}
 });
 
-if (process.platform === 'linux' && semver.gte(process.version, '12.17.0')) {
+if (process.platform === 'linux') {
 	// https://github.com/nodejs/node/issues/35503
 	test.failing('process name can\'t work in Linux on Node.js >=12.17', async t => {
 		const title = 'noop-process';
