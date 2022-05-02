@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 const execFile = promisify(childProcess.execFile);
 
-const windows = async () => {
+const windows = async (options = {}) => {
 	// Source: https://github.com/MarkTiedemann/fastlist
 	let binary;
 	switch (process.arch) {
@@ -23,7 +23,10 @@ const windows = async () => {
 			throw new Error(`Unsupported architecture: ${process.arch}`);
 	}
 
-	const binaryPath = path.join(__dirname, 'vendor', binary);
+	let binaryPath = path.join(__dirname, 'vendor', binary);
+	if (options.vendorPath) {
+		binaryPath = path.join(options.vendorPath, binary);
+	}
 	const {stdout} = await execFile(binaryPath, {
 		maxBuffer: TEN_MEGABYTES,
 		windowsHide: true,

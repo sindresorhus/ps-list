@@ -7,6 +7,8 @@ export interface Options {
 	@default true
 	*/
 	readonly all?: boolean;
+
+	readonly vendorPath?: string;
 }
 
 export interface ProcessDescriptor {
