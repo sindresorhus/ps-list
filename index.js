@@ -96,8 +96,8 @@ const nonWindowsCall = async (options = {}) => {
 
 	const processCmds = {};
 	for (const line of psArgsLines) {
-		const [pid, cmd] = line.trim().split(' ');
-		processCmds[pid] = cmd;
+		const [pid, cmds] = line.trim().split(' ');
+		processCmds[pid] = cmds.join(' ');
 	}
 
 	const processes = psLines.map(line => {
