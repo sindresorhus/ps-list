@@ -79,7 +79,7 @@ const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
 
 const psFields = 'pid,ppid,uid,%cpu,%mem,comm,args';
 
-const psOutputRegex = /^[ \t]*(?<pid>\d+)[ \t]+(?<ppid>\d+)[ \t]+(?<uid>[-\d]+)[ \t]+(?<cpu>\d+\.\d+)[ \t]+(?<memory>\d+\.\d+)[ \t]+/;
+const psOutputRegex = /^[ \t]*(?<pid>\d+)[ \t]+(?<ppid>\d+)[ \t]+(?<uid>[-\d]+)[ \t]+(?<cpu>\d+\.\d+)[ \t]+(?<memory>\d+\.\d+)[ \t]+(?<args>.*)?/;
 
 const nonWindowsSingleCall = async (options = {}) => {
 	const flags = options.all === false ? 'wwxo' : 'awwxo';
