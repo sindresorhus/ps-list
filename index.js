@@ -100,9 +100,7 @@ const nonWindowsCall = async (options = {}) => {
 		processNames[pid] = path.basename(cmd);
 	}
 
-	const psIndexes = [];
-
-	const processes = psLines.map((line, index) => {
+	const processes = psLines.map(line => {
 		const match = psOutputRegex.exec(line);
 
 		if (match === null) {
@@ -121,12 +119,8 @@ const nonWindowsCall = async (options = {}) => {
 			cmd: args,
 		};
 
-		if (psPids.has(processInfo.pid)) {
-			psIndexes.push(index);
-		}
-
 		return processInfo;
-	}).filter(processInfo => !psIndexes.includes(processInfo.pid));
+	}).filter(processInfo => !psPids.has(processInfo.pid));
 
 	return processes;
 };
