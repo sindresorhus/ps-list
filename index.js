@@ -77,27 +77,27 @@ const nonWindowsMultipleCalls = async (options = {}) => {
 
 const ERROR_MESSAGE_PARSING_FAILED = 'ps output parsing failed';
 
-const psOutputRegex = /^[ \t]*(?<pid>\d+)[ \t]+(?<ppid>\d+)[ \t]+(?<uid>[-\d]+)[ \t]+(?<cpu>\d+\.\d+)[ \t]+(?<memory>\d+\.\d+)[ \t]+(?<args>.*)?/;
+const psOutputRegex = /^[ \t]*(?<pid>\d+)[ \t]+(?<ppid>\d+)[ \t]+(?<uid>[-\d]+)[ \t]+(?<cpu>\d+\.\d+)[ \t]+(?<memory>\d+\.\d+)[ \t]+(?<comm>.*)?/;
 
 const nonWindowsCall = async (options = {}) => {
 	const flags = options.all === false ? 'wwxo' : 'awwxo';
 
 	const psPromises = [
-		execFile('ps', [flags, 'pid,ppid,uid,%cpu,%mem,args'], {maxBuffer: TEN_MEGABYTES}),
-		execFile('ps', [flags, 'pid,comm'], {maxBuffer: TEN_MEGABYTES}),
+		execFile('ps', [flags, 'pid,ppid,uid,%cpu,%mem,comm'], {maxBuffer: TEN_MEGABYTES}),
+		execFile('ps', [flags, 'pid,args'], {maxBuffer: TEN_MEGABYTES}),
 	];
 
-	const [psLines, psCommLines] = (await Promise.all(psPromises)).map(({stdout}) => stdout.trim().split('\n'));
+	const [psLines, psArgsLines] = (await Promise.all(psPromises)).map(({stdout}) => stdout.trim().split('\n'));
 
 	const psPids = new Set(psPromises.map(promise => promise.child.pid));
 
 	psLines.shift();
-	psCommLines.shift();
+	psArgsLines.shift();
 
-	const processNames = {};
-	for (const line of psCommLines) {
+	const processCmds = {};
+	for (const line of psArgsLines) {
 		const [pid, cmd] = line.trim().split(' ');
-		processNames[pid] = path.basename(cmd);
+		processCmds[pid] = cmd;
 	}
 
 	const processes = psLines.map(line => {
@@ -107,7 +107,7 @@ const nonWindowsCall = async (options = {}) => {
 			throw new Error(ERROR_MESSAGE_PARSING_FAILED);
 		}
 
-		const {pid, ppid, uid, cpu, memory, args} = match.groups;
+		const {pid, ppid, uid, cpu, memory, comm} = match.groups;
 
 		const processInfo = {
 			pid: Number.parseInt(pid, 10),
@@ -115,8 +115,8 @@ const nonWindowsCall = async (options = {}) => {
 			uid: Number.parseInt(uid, 10),
 			cpu: Number.parseFloat(cpu),
 			memory: Number.parseFloat(memory),
-			name: processNames[pid],
-			cmd: args,
+			name: path.basename(comm),
+			cmd: processCmds[pid],
 		};
 
 		return processInfo;
