@@ -1,6 +1,6 @@
 {
 	"name": "ps-list",
-	"version": "8.1.1",
+	"version": "9.0.0",
 	"description": "Get running processes",
 	"license": "MIT",
 	"repository": "sindresorhus/ps-list",
