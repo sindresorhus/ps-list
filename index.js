@@ -80,6 +80,53 @@ const extractExecutablePath = commandLine => {
 	return '';
 };
 
+const extractCommandArguments = (commandLine, executablePath, commandName) => {
+	if (!commandLine) {
+		return '';
+	}
+
+	const trimmedCommandLine = commandLine.trim();
+	const possiblePrefixes = [
+		executablePath && `"${executablePath}"`,
+		executablePath,
+		executablePath && path.basename(executablePath),
+		commandName,
+	].filter(Boolean);
+
+	for (const prefix of possiblePrefixes) {
+		if (trimmedCommandLine === prefix) {
+			return '';
+		}
+
+		if (trimmedCommandLine.startsWith(`${prefix} `)) {
+			return trimmedCommandLine.slice(prefix.length).trim();
+		}
+	}
+
+	const quotedCommandMatch = trimmedCommandLine.match(/^"[^"]+"\s*(.*)$/);
+	if (quotedCommandMatch) {
+		return quotedCommandMatch[1].trim();
+	}
+
+	const firstSpaceIndex = trimmedCommandLine.indexOf(' ');
+	return firstSpaceIndex === -1 ? '' : trimmedCommandLine.slice(firstSpaceIndex + 1).trim();
+};
+
+const readLinuxProcessArguments = processId => {
+	try {
+		const commandLine = fs.readFileSync(`/proc/${processId}/cmdline`, 'utf8');
+		const parts = commandLine.split('\0');
+
+		if (parts.at(-1) === '') {
+			parts.pop();
+		}
+
+		return parts.length > 1 ? parts.slice(1).join(' ') : '';
+	} catch {
+		// Fall back to parsing the ps command line.
+	}
+};
+
 // Resolve executable path - simple approach
 const resolveExecutablePath = (operatingSystemPlatform, processId, commandLine) => {
 	// On Linux, try /proc/{pid}/exe first for accurate path
@@ -94,6 +141,17 @@ const resolveExecutablePath = (operatingSystemPlatform, processId, commandLine) 
 
 	// Extract path from command line
 	return extractExecutablePath(commandLine);
+};
+
+const resolveProcessArguments = ({operatingSystemPlatform, processId, commandLine, executablePath, commandName}) => {
+	if (operatingSystemPlatform === 'linux' && processId) {
+		const linuxArguments = readLinuxProcessArguments(processId);
+		if (linuxArguments !== undefined) {
+			return linuxArguments;
+		}
+	}
+
+	return extractCommandArguments(commandLine, executablePath, commandName);
 };
 
 // Parse and validate numeric field with fallback
@@ -127,6 +185,13 @@ const parseProcessFields = ({processId, parentProcessId, userId, cpuUsage, memor
 
 	// Resolve executable path from command line
 	const resolvedExecutablePath = resolveExecutablePath(process.platform, parsedProcessId, command);
+	const resolvedArguments = resolveProcessArguments({
+		operatingSystemPlatform: process.platform,
+		processId: parsedProcessId,
+		commandLine: command,
+		executablePath: resolvedExecutablePath,
+		commandName,
+	});
 
 	// Derive process name: prefer basename of path, fallback to command name
 	const derivedProcessName = resolvedExecutablePath ? path.basename(resolvedExecutablePath) : (commandName || '');
@@ -139,6 +204,7 @@ const parseProcessFields = ({processId, parentProcessId, userId, cpuUsage, memor
 		memory: parsedMemoryUsagePercentage,
 		name: derivedProcessName,
 		path: resolvedExecutablePath,
+		args: resolvedArguments,
 		startTime: makeStartTime(startTimeString),
 		cmd: command || '',
 	};

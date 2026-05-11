@@ -53,6 +53,13 @@ export type ProcessDescriptor = {
 	readonly path?: string;
 
 	/**
+	Command-line arguments without the executable path.
+
+	Not supported on Windows.
+	*/
+	readonly args?: string;
+
+	/**
 	The date and time when the process was started.
 
 	Not supported on Windows. May be `undefined` if the date cannot be parsed.
@@ -70,7 +77,7 @@ Get running processes.
 import psList from 'ps-list';
 
 console.log(await psList());
-//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5, path: '/usr/local/bin/node', startTime: 2025-01-15T10:30:00.000Z}, …]
+//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5, path: '/usr/local/bin/node', args: 'test.js', startTime: 2025-01-15T10:30:00.000Z}, …]
 ```
 */
 export default function psList(options?: Options): Promise<ProcessDescriptor[]>;

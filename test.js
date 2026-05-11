@@ -30,6 +30,7 @@ test('main', async t => {
 			&& typeof x.memory === 'number'
 			&& (typeof x.uid === 'number' || x.uid === undefined)
 			&& typeof x.path === 'string'
+			&& typeof x.args === 'string'
 			&& (x.startTime instanceof Date || x.startTime === undefined)));
 
 		// Verify Date objects are valid (not Invalid Date)
@@ -68,6 +69,7 @@ test('custom binary', async t => {
 
 	if (!isWindows) {
 		t.is(record.cmd, `${nodeBinaryName} ${arguments_.join(' ')}`);
+		t.is(record.args, arguments_.join(' '));
 		t.is(record.uid, process.getuid());
 		// Path can be empty (relative command) or absolute (CI environments)
 		t.true(typeof record.path === 'string', 'Path should be a string');
@@ -138,6 +140,7 @@ test('large command line', async t => {
 		t.truthy(record, 'Should find process with large command line');
 		if (record) {
 			t.true(record.cmd.length > 9000, 'Should capture long command line');
+			t.true(record.args.length > 9000, 'Should capture long command arguments');
 		}
 	} finally {
 		sleepForever.kill(9);

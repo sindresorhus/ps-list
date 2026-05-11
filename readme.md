@@ -16,7 +16,7 @@ npm install ps-list
 import psList from 'ps-list';
 
 console.log(await psList());
-//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5, path: '/usr/local/bin/node', startTime: 2025-01-15T10:30:00.000Z}, …]
+//=> [{pid: 3213, name: 'node', cmd: 'node test.js', ppid: 1, uid: 501, cpu: 0.1, memory: 1.5, path: '/usr/local/bin/node', args: 'test.js', startTime: 2025-01-15T10:30:00.000Z}, …]
 ```
 
 ## API
@@ -28,6 +28,7 @@ Returns a `Promise<ProcessDescriptor[]>` with the running processes.
 On macOS and Linux:
 - The `name` property is truncated to 15 characters by the system
 - The `cmd` property contains the full command line with arguments
+- The `args` property contains the command-line arguments without the executable path
 - The `cpu` property is the CPU usage percentage (0-100)
 - The `memory` property is the memory usage percentage (0-100)
 - The `path` property is a best-effort attempt to get the full executable path:
@@ -36,7 +37,7 @@ On macOS and Linux:
   - Falls back to `comm` (which may be truncated)
 - The `startTime` property contains the process start time as a Date object
 
-The `cmd`, `cpu`, `memory`, `uid`, `path`, and `startTime` properties are not available on Windows.
+The `cmd`, `cpu`, `memory`, `uid`, `path`, `args`, and `startTime` properties are not available on Windows.
 
 #### options
 
